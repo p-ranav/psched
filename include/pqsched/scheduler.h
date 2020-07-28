@@ -3,7 +3,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
-#include <pqsched/priority_queue.h>
+#include <pqsched/queue.h>
 #include <thread>
 
 namespace pqsched {
@@ -16,7 +16,10 @@ template <typename Task, size_t PriorityLevels> class scheduler {
 
   void run() {
     while (true) {
-      std::this_thread::sleep_for(std::chrono::seconds(5));
+
+      // Remove sleep when you actually do something with task
+      std::this_thread::sleep_for(std::chrono::seconds(2));
+
 
       Task task;
       bool dequeued = false;
@@ -35,7 +38,6 @@ template <typename Task, size_t PriorityLevels> class scheduler {
         continue;
 
       // do something with task
-      std::cout << "\nDequeued task: " << task << "\n\n" << std::endl;
     }
   }
 
