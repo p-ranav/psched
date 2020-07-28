@@ -4,16 +4,15 @@
 #include <condition_variable>
 #include <mutex>
 #include <pqsched/queue.h>
+#include <pqsched/task.h>
 #include <thread>
 
 namespace pqsched {
 
-using Task = std::function<void()>;
-
 template <size_t priority_levels> class scheduler {
   const unsigned count_{std::thread::hardware_concurrency()};
   std::vector<std::thread> threads_;
-  std::array<queue<Task>, priority_levels> priority_queues_;
+  std::array<queue, priority_levels> priority_queues_;
   std::array<std::mutex, priority_levels> mutex_;
 
   void run() {
@@ -53,10 +52,11 @@ public:
       t.join();
   }
 
-  void schedule(Task &&fn, size_t priority) {
+  void schedule(const Task & task) {
+    const size_t priority = task.get_priority();
     lock_t lock{mutex_[priority]};
     while (true) {
-      if (priority_queues_[priority].try_push(std::forward<Task>(fn)))
+      if (priority_queues_[priority].try_push(task))
         break;
     }
   }

@@ -3,12 +3,13 @@
 #include <iostream>
 #include <mutex>
 #include <queue>
+#include <pqsched/task.h>
 
 using lock_t = std::unique_lock<std::mutex>;
 
 namespace pqsched {
 
-template <typename Task> class queue {
+class queue {
   std::deque<Task> queue_;
   std::mutex mutex_;
   bool done_{false};
@@ -24,12 +25,12 @@ public:
     return true;
   }
 
-  bool try_push(Task &&task) {
+  bool try_push(const Task &task) {
     {
       lock_t lock{mutex_, std::try_to_lock};
       if (!lock)
         return false;
-      queue_.emplace_back(std::forward<Task>(task));
+      queue_.emplace_back(task);
     }
     ready_.notify_one();
     return true;
@@ -54,10 +55,10 @@ public:
     return true;
   }
 
-  void push(Task &&task) {
+  void push(const Task &task) {
     {
       lock_t lock{mutex_};
-      queue_.emplace_back(std::forward<Task>(task));
+      queue_.emplace_back(task);
     }
     ready_.notify_one();
   }

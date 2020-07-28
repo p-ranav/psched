@@ -23,12 +23,16 @@ int main() {
       for (size_t i = 0; i < 500; ++i) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         const auto priority = random_priority();
-        scheduler.schedule(
+
+        Task task;
+        task.set_priority(priority);
+        task.set_function( 
           [&]() {
             std::cout << "Executing task " << i << "\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(500)); 
-          }, 
-          priority);
+        });
+
+        scheduler.schedule(task);
       }
     });
 
@@ -37,12 +41,17 @@ int main() {
       for (size_t i = 0; i < 500; ++i) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
         const auto priority = random_priority();
-        scheduler.schedule(
+
+        Task task;
+        task.set_priority(priority);
+        task.set_function( 
           [&]() {
             std::cout << "Executing task " << i << "\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(500)); 
-          }, 
-          priority);
+        });
+
+        scheduler.schedule(task);
+
       }
     });
 
