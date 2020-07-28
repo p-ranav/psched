@@ -29,7 +29,7 @@ int main() {
         task.on_execute( 
           [&]() {
             // do work here
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000)); 
+            std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
         });
         task.on_complete(
           [&](TaskStats stats) {
@@ -42,13 +42,19 @@ int main() {
           }
         );
 
+        task.on_error(
+          [](TaskStats stats, const char * error) {
+            std::cout << error << "\n";
+          }
+        );
+
         scheduler.schedule(task);
       }
     });
 
     // schedule task every 50ms
     auto t2 = std::thread([&]() {
-      for (size_t i = 0; i < 500; ++i) {
+      for (size_t j = 0; j < 500; ++j) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
         const auto priority = random_priority();
 
@@ -56,16 +62,54 @@ int main() {
         task.set_priority(priority);
         task.on_execute( 
           [&]() {
-            std::this_thread::sleep_for(std::chrono::milliseconds(2000)); 
+            std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
         });
         task.on_complete(
           [&](TaskStats stats) {
             const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
             const auto response_time = stats.response_time<std::chrono::milliseconds>();
-            std::cout << "Executed task " << i 
+            std::cout << "Executed task " << j
                       << ". Response time = " << response_time 
                       << " milliseconds, Computation time = " 
                       << computation_time << " milliseconds\n";
+          }
+        );
+        task.on_error(
+          [](TaskStats stats, const char * error) {
+            std::cout << error << "\n";
+          }
+        );
+
+        scheduler.schedule(task);
+
+      }
+    });
+
+    // schedule task every 200ms
+    auto t3 = std::thread([&]() {
+      for (size_t k = 0; k < 500; ++k) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        const auto priority = random_priority();
+
+        Task task;
+        task.set_priority(priority);
+        task.on_execute( 
+          [&]() {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
+        });
+        task.on_complete(
+          [&](TaskStats stats) {
+            const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
+            const auto response_time = stats.response_time<std::chrono::milliseconds>();
+            std::cout << "Executed task " << k
+                      << ". Response time = " << response_time 
+                      << " milliseconds, Computation time = " 
+                      << computation_time << " milliseconds\n";
+          }
+        );
+        task.on_error(
+          [](TaskStats stats, const char * error) {
+            std::cout << error << "\n";
           }
         );
 
@@ -76,5 +120,6 @@ int main() {
 
     t1.join();
     t2.join();
+    t3.join();
   }
 }
