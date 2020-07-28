@@ -22,8 +22,7 @@ template <typename Task, class priority_levels> class scheduler {
     while (true) {
 
       // Remove sleep when you actually do something with task
-      std::this_thread::sleep_for(std::chrono::seconds(1));
-
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
       Task task;
       bool dequeued = false;

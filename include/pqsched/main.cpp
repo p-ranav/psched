@@ -2,8 +2,14 @@
 #include <iostream>
 #include <pqsched/scheduler.h>
 #include <thread>
-
 #include <random>
+
+struct task {
+  int id;
+  task(int id) : id(id) {}
+
+  void operator()() {}
+};
 
 int main() {
 
@@ -37,8 +43,19 @@ int main() {
       }
     });
 
+    auto t3 = std::thread([&]() {
+      for (size_t i = 0; i < 500; ++i) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(125));
+        const auto priority = random_priority();
+        std::cout << "Enqueuing task " << i << " in queue with priority "
+                  << priority << std::endl;
+        scheduler.schedule(i, priority);
+      }
+    });
+
     t1.join();
     t2.join();
+    t3.join();
 
   }
 }
