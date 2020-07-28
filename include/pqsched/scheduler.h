@@ -1,15 +1,14 @@
 #pragma once
-#include <pqsched/priority_queue.h>
 #include <array>
 #include <atomic>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
+#include <pqsched/priority_queue.h>
 #include <thread>
 
 namespace pqsched {
 
-template <typename Task, size_t PriorityLevels>
-class scheduler {
+template <typename Task, size_t PriorityLevels> class scheduler {
   const unsigned count_{std::thread::hardware_concurrency()};
   std::vector<std::thread> threads_;
   std::array<queue<Task>, PriorityLevels> priority_queues_;
@@ -17,30 +16,30 @@ class scheduler {
 
   void run() {
     while (true) {
+      std::this_thread::sleep_for(std::chrono::seconds(5));
+
       Task task;
       bool dequeued = false;
 
       // Start from highest priority queue
       for (size_t i = 0; i < PriorityLevels; i++) {
-	// Try to pop an item
-	lock_t lock{mutex_[i]};
-	if (priority_queues_[i].try_pop(task)) {
-	  dequeued = true;
-	  break;
-	}
+        // Try to pop an item
+        lock_t lock{mutex_[i]};
+        if (priority_queues_[i].try_pop(task)) {
+          dequeued = true;
+          break;
+        }
       }
 
       if (!dequeued)
-	continue;
+        continue;
 
       // do something with task
-      std::cout << "Dequeued task: " << task << std::endl;
-      std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+      std::cout << "\nDequeued task: " << task << "\n\n" << std::endl;
     }
   }
 
 public:
-
   scheduler() {
     for (unsigned n = 0; n != count_; ++n) {
       threads_.emplace_back([this] { run(); });
@@ -48,17 +47,17 @@ public:
   }
 
   ~scheduler() {
-    for (auto& q: priority_queues_)
+    for (auto &q : priority_queues_)
       q.done();
-    for (auto& t: threads_)
+    for (auto &t : threads_)
       t.join();
   }
-  
-  void schedule(Task&& task, size_t priority) {
+
+  void schedule(Task &&task, size_t priority) {
     lock_t lock{mutex_[priority]};
-    while(true) {
+    while (true) {
       if (priority_queues_[priority].try_push(std::forward<Task>(task)))
-	break;
+        break;
     }
     print_queues();
   }
@@ -66,13 +65,13 @@ public:
   void print_queues() {
     size_t priority_level = 0;
     std::cout << "\n";
-    for (auto& q : priority_queues_) {
-      std::cout << priority_level << " ";
+    for (auto &q : priority_queues_) {
+      std::cout << "P" << priority_level << " ";
       q.print_queue();
       priority_level += 1;
     }
     std::cout << "\n";
   }
 };
-  
-}
+
+} // namespace pqsched
