@@ -8,24 +8,28 @@
 
 namespace pqsched {
 
-template <typename Task, size_t PriorityLevels> class scheduler {
+template <size_t priority> struct priority_levels {
+  constexpr static char value = priority;
+};
+
+template <typename Task, class priority_levels> class scheduler {
   const unsigned count_{std::thread::hardware_concurrency()};
   std::vector<std::thread> threads_;
-  std::array<queue<Task>, PriorityLevels> priority_queues_;
-  std::array<std::mutex, PriorityLevels> mutex_;
+  std::array<queue<Task>, priority_levels::value> priority_queues_;
+  std::array<std::mutex, priority_levels::value> mutex_;
 
   void run() {
     while (true) {
 
       // Remove sleep when you actually do something with task
-      std::this_thread::sleep_for(std::chrono::seconds(2));
+      std::this_thread::sleep_for(std::chrono::seconds(1));
 
 
       Task task;
       bool dequeued = false;
 
       // Start from highest priority queue
-      for (size_t i = 0; i < PriorityLevels; i++) {
+      for (size_t i = 0; i < priority_levels::value; i++) {
         // Try to pop an item
         lock_t lock{mutex_[i]};
         if (priority_queues_[i].try_pop(task)) {
