@@ -85,41 +85,41 @@ int main() {
       }
     });
 
-    // schedule task every 200ms
-    auto t3 = std::thread([&]() {
-      for (size_t k = 0; k < 500; ++k) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
-        const auto priority = random_priority();
+    // // schedule task every 200ms
+    // auto t3 = std::thread([&]() {
+    //   for (size_t k = 0; k < 500; ++k) {
+    //     std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    //     const auto priority = random_priority();
 
-        Task task;
-        task.set_priority(priority);
-        task.on_execute( 
-          [&]() {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
-        });
-        task.on_complete(
-          [&](TaskStats stats) {
-            const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
-            const auto response_time = stats.response_time<std::chrono::milliseconds>();
-            std::cout << "Executed task " << k
-                      << ". Response time = " << response_time 
-                      << " milliseconds, Computation time = " 
-                      << computation_time << " milliseconds\n";
-          }
-        );
-        task.on_error(
-          [](TaskStats stats, const char * error) {
-            std::cout << error << "\n";
-          }
-        );
+    //     Task task;
+    //     task.set_priority(priority);
+    //     task.on_execute( 
+    //       [&]() {
+    //         std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
+    //     });
+    //     task.on_complete(
+    //       [&](TaskStats stats) {
+    //         const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
+    //         const auto response_time = stats.response_time<std::chrono::milliseconds>();
+    //         std::cout << "Executed task " << k
+    //                   << ". Response time = " << response_time 
+    //                   << " milliseconds, Computation time = " 
+    //                   << computation_time << " milliseconds\n";
+    //       }
+    //     );
+    //     task.on_error(
+    //       [](TaskStats stats, const char * error) {
+    //         std::cout << error << "\n";
+    //       }
+    //     );
 
-        scheduler.schedule(task);
+    //     scheduler.schedule(task);
 
-      }
-    });
+    //   }
+    // });
 
     t1.join();
     t2.join();
-    t3.join();
+    // t3.join();
   }
 }
