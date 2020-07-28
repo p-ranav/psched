@@ -5,8 +5,6 @@
 #include <queue>
 #include <pqsched/task.h>
 
-using lock_t = std::unique_lock<std::mutex>;
-
 namespace pqsched {
 
 class TaskQueue {
@@ -17,7 +15,7 @@ class TaskQueue {
 
 public:
   bool try_pop(Task &task) {
-    lock_t lock{mutex_, std::try_to_lock};
+    std::unique_lock<std::mutex> lock{mutex_, std::try_to_lock};
     if (!lock || queue_.empty())
       return false;
     task = std::move(queue_.front());
@@ -25,11 +23,12 @@ public:
     return true;
   }
 
-  bool try_push(const Task &task) {
+  bool try_push(Task &task) {
     {
-      lock_t lock{mutex_, std::try_to_lock};
+      std::unique_lock<std::mutex> lock{mutex_, std::try_to_lock};
       if (!lock)
         return false;
+      task.save_arrival_time(); // task about to be enqueued. Mark as ready here
       queue_.emplace_back(task);
     }
     ready_.notify_one();
@@ -38,14 +37,14 @@ public:
 
   void done() {
     {
-      lock_t lock{mutex_};
+      std::unique_lock<std::mutex> lock{mutex_};
       done_ = true;
     }
     ready_.notify_all();
   }
 
   bool pop(Task &task) {
-    lock_t lock{mutex_};
+    std::unique_lock<std::mutex> lock{mutex_};
     while (queue_.empty())
       ready_.wait(lock);
     if (queue_.empty())
@@ -55,9 +54,10 @@ public:
     return true;
   }
 
-  void push(const Task &task) {
+  void push(Task &task) {
     {
-      lock_t lock{mutex_};
+      std::unique_lock<std::mutex> lock{mutex_};
+      task.save_arrival_time();
       queue_.emplace_back(task);
     }
     ready_.notify_one();

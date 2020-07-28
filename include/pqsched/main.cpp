@@ -26,11 +26,21 @@ int main() {
 
         Task task;
         task.set_priority(priority);
-        task.set_function( 
+        task.on_execute( 
           [&]() {
-            std::cout << "Executing task " << i << "\n";
-            std::this_thread::sleep_for(std::chrono::milliseconds(500)); 
+            // do work here
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000)); 
         });
+        task.on_complete(
+          [&](TaskStats stats) {
+            const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
+            const auto response_time = stats.response_time<std::chrono::milliseconds>();
+            std::cout << "Executed task " << i 
+                      << ". Response time = " << response_time 
+                      << " milliseconds, Computation time = " 
+                      << computation_time << " milliseconds\n";
+          }
+        );
 
         scheduler.schedule(task);
       }
@@ -44,11 +54,20 @@ int main() {
 
         Task task;
         task.set_priority(priority);
-        task.set_function( 
+        task.on_execute( 
           [&]() {
-            std::cout << "Executing task " << i << "\n";
-            std::this_thread::sleep_for(std::chrono::milliseconds(500)); 
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000)); 
         });
+        task.on_complete(
+          [&](TaskStats stats) {
+            const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
+            const auto response_time = stats.response_time<std::chrono::milliseconds>();
+            std::cout << "Executed task " << i 
+                      << ". Response time = " << response_time 
+                      << " milliseconds, Computation time = " 
+                      << computation_time << " milliseconds\n";
+          }
+        );
 
         scheduler.schedule(task);
 

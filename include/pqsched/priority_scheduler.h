@@ -23,7 +23,7 @@ template <size_t priority_levels> class PriorityScheduler {
       // Start from highest priority queue
       for (size_t i = 0; i < priority_levels; i++) {
         // Try to pop an item
-        lock_t lock{mutex_[i]};
+        std::unique_lock<std::mutex> lock{mutex_[i]};
         if (priority_queues_[i].try_pop(task)) {
           dequeued = true;
           break;
@@ -52,9 +52,9 @@ public:
       t.join();
   }
 
-  void schedule(const Task & task) {
+  void schedule(Task & task) {
     const size_t priority = task.get_priority();
-    lock_t lock{mutex_[priority]};
+    std::unique_lock<std::mutex> lock{mutex_[priority]};
     while (true) {
       if (priority_queues_[priority].try_push(task))
         break;
