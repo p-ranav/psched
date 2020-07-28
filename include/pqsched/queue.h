@@ -61,14 +61,6 @@ public:
     }
     ready_.notify_one();
   }
-
-  void print_queue() {
-    std::cout << "| ";
-    for (auto &q : queue_) {
-      std::cout << q << " | ";
-    }
-    std::cout << "\n";
-  }
 };
 
 } // namespace pqsched

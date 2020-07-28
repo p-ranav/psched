@@ -8,27 +8,21 @@
 
 namespace pqsched {
 
-template <size_t priority> struct priority_levels {
-  constexpr static char value = priority;
-};
+using Task = std::function<void()>;
 
-template <typename Task, class priority_levels> class scheduler {
+template <size_t priority_levels> class scheduler {
   const unsigned count_{std::thread::hardware_concurrency()};
   std::vector<std::thread> threads_;
-  std::array<queue<Task>, priority_levels::value> priority_queues_;
-  std::array<std::mutex, priority_levels::value> mutex_;
+  std::array<queue<Task>, priority_levels> priority_queues_;
+  std::array<std::mutex, priority_levels> mutex_;
 
   void run() {
     while (true) {
-
-      // Remove sleep when you actually do something with task
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
       Task task;
       bool dequeued = false;
 
       // Start from highest priority queue
-      for (size_t i = 0; i < priority_levels::value; i++) {
+      for (size_t i = 0; i < priority_levels; i++) {
         // Try to pop an item
         lock_t lock{mutex_[i]};
         if (priority_queues_[i].try_pop(task)) {
@@ -40,7 +34,8 @@ template <typename Task, class priority_levels> class scheduler {
       if (!dequeued)
         continue;
 
-      // do something with task
+      // execute task
+      task();
     }
   }
 
@@ -58,25 +53,14 @@ public:
       t.join();
   }
 
-  void schedule(Task &&task, size_t priority) {
+  void schedule(Task &&fn, size_t priority) {
     lock_t lock{mutex_[priority]};
     while (true) {
-      if (priority_queues_[priority].try_push(std::forward<Task>(task)))
+      if (priority_queues_[priority].try_push(std::forward<Task>(fn)))
         break;
     }
-    print_queues();
   }
 
-  void print_queues() {
-    size_t priority_level = 0;
-    std::cout << "\n";
-    for (auto &q : priority_queues_) {
-      std::cout << "P" << priority_level << " ";
-      q.print_queue();
-      priority_level += 1;
-    }
-    std::cout << "\n";
-  }
 };
 
 } // namespace pqsched
