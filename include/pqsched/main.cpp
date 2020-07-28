@@ -1,6 +1,6 @@
 #include <chrono>
 #include <iostream>
-#include <pqsched/scheduler.h>
+#include <pqsched/priority_scheduler.h>
 #include <thread>
 #include <random>
 #include <functional>
@@ -16,7 +16,7 @@ int main() {
 
   std::cout << "Scheduler Test 1\n";
   {
-    scheduler<10> scheduler;
+    PriorityScheduler<10> scheduler;
 
     // schedule task every 100ms
     auto t1 = std::thread([&]() {

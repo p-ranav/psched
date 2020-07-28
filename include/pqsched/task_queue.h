@@ -9,7 +9,7 @@ using lock_t = std::unique_lock<std::mutex>;
 
 namespace pqsched {
 
-class queue {
+class TaskQueue {
   std::deque<Task> queue_;
   std::mutex mutex_;
   bool done_{false};

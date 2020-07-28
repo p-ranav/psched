@@ -3,16 +3,16 @@
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
-#include <pqsched/queue.h>
 #include <pqsched/task.h>
+#include <pqsched/task_queue.h>
 #include <thread>
 
 namespace pqsched {
 
-template <size_t priority_levels> class scheduler {
+template <size_t priority_levels> class PriorityScheduler {
   const unsigned count_{std::thread::hardware_concurrency()};
   std::vector<std::thread> threads_;
-  std::array<queue, priority_levels> priority_queues_;
+  std::array<TaskQueue, priority_levels> priority_queues_;
   std::array<std::mutex, priority_levels> mutex_;
 
   void run() {
@@ -39,13 +39,13 @@ template <size_t priority_levels> class scheduler {
   }
 
 public:
-  scheduler() {
+  PriorityScheduler() {
     for (unsigned n = 0; n != count_; ++n) {
       threads_.emplace_back([this] { run(); });
     }
   }
 
-  ~scheduler() {
+  ~PriorityScheduler() {
     for (auto &q : priority_queues_)
       q.done();
     for (auto &t : threads_)
