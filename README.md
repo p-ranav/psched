@@ -89,6 +89,7 @@ int main() {
     }
   });
   
+  timer1.join();
 }
 ```
 
