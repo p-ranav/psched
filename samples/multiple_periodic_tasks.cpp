@@ -9,6 +9,9 @@ int main() {
     // Periodic Timer 1 - 50ms period
     auto timer1 = std::thread([&scheduler]() {
       while (true) {
+        // Sleep for 50ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
         // Generate task
         Task t;
         t.on_execute([] {
@@ -22,15 +25,15 @@ int main() {
           std::cout << "Response time = " << stats.response_time() << "ms\n";
         });
         scheduler.schedule(t, 4); // lowest priority
-
-        // Sleep for 50ms
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
       }
     });
 
     // Periodic Timer 2 - 100ms period
     auto timer2 = std::thread([&scheduler]() {
       while (true) {
+        // Sleep for 50ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
         // Generate task
         Task t;
         t.on_execute([] {
@@ -44,15 +47,15 @@ int main() {
           std::cout << "Response time = " << stats.response_time() << "ms\n";
         });
         scheduler.schedule(t, 3); // low priority
-
-        // Sleep for 50ms
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
       }
     });
 
     // Periodic Timer 3 - 250ms period
     auto timer3 = std::thread([&scheduler]() {
       while (true) {
+        // Sleep for 50ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+
         // Generate task
         Task t;
         t.on_execute([] {
@@ -66,15 +69,15 @@ int main() {
           std::cout << "Response time = " << stats.response_time() << "ms\n";
         });
         scheduler.schedule(t, 2); // medium priority
-
-        // Sleep for 50ms
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
       }
     });
 
     // Periodic Timer 4 - 500ms period
     auto timer4 = std::thread([&scheduler]() {
       while (true) {
+        // Sleep for 50ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
         // Generate task
         Task t;
         t.on_execute([] {
@@ -88,15 +91,15 @@ int main() {
           std::cout << "Response time = " << stats.response_time() << "ms\n";
         });
         scheduler.schedule(t, 1); // high priority
-
-        // Sleep for 50ms
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
       }
     });
 
     // Periodic Timer 5 - 1s period
     auto timer5 = std::thread([&scheduler]() {
       while (true) {
+        // Sleep for 50ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        
         // Generate task
         Task t;
         t.on_execute([] {
@@ -110,9 +113,6 @@ int main() {
           std::cout << "Response time = " << stats.response_time() << "ms\n";
         });
         scheduler.schedule(t, 0); // highest priority
-
-        // Sleep for 50ms
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
       }
     });
 
