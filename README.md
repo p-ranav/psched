@@ -12,7 +12,7 @@
   <img height="400" src="img/priority_scheduling.png"/>  
 </p>
 
-## Simple Periodic Task
+## Single Periodic Task
 
 * The following scheduler uses 4 worker threads and 5 queues (for the 5 priority levels). 
   - Priority 0 is the highest priority
