@@ -30,7 +30,6 @@ template <class threads, class priority_levels> class PriorityScheduler {
       // Start from highest priority queue
       for (size_t i = 0; i < priority_levels::value; i++) {
         // Try to pop an item
-        // std::unique_lock<std::mutex> lock{mutex_[i]};
         if (priority_queues_[i].try_pop(task)) {
           dequeued = true;
           break;
@@ -46,12 +45,6 @@ template <class threads, class priority_levels> class PriorityScheduler {
   }
 
 public:
-  // PriorityScheduler() {
-  //   for (unsigned n = 0; n != count_; ++n) {
-  //     threads_.emplace_back([this] { run(); });
-  //   }
-  // }
-
   ~PriorityScheduler() {
     for (auto &t : threads_)
       t.join();
@@ -59,7 +52,6 @@ public:
 
   void schedule(Task & task) {
     const size_t priority = task.get_priority();
-    // std::unique_lock<std::mutex> lock{mutex_[priority]};
     while (true) {
       if (priority_queues_[priority].try_push(task)) {
         break;
@@ -77,6 +69,8 @@ public:
 
   void stop() {
     running_ = false;
+    for (auto &t : threads_)
+      t.join();
   }
 
 };
