@@ -76,7 +76,6 @@ public:
   void start() {
     running_ = true;
     for (unsigned n = 0; n != threads::value; ++n) {
-      std::cout << "Starting thread " << n << "\n";
       threads_.emplace_back([this] { run(); });
     }
   }
