@@ -17,6 +17,7 @@ int main() {
   std::cout << "Scheduler Test 1\n";
   PriorityScheduler<threads<5>, priority_levels<10>> scheduler;
   scheduler.start();
+  /*
   {
 
     // schedule task every 100ms
@@ -127,7 +128,7 @@ int main() {
     t2.join();
     t3.join();
   }
-
+  */
   std::this_thread::sleep_for(std::chrono::seconds(5));
   std::cout << "All tasks completed\n";
 }
