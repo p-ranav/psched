@@ -15,8 +15,7 @@
 ## Single Periodic Task
 
 * The following scheduler uses 4 worker threads and 5 queues (for the 5 priority levels). 
-  - Priority 0 is the highest priority
-  - Priority 4 is the lowest priority
+  - 0 = Highest Priority, 4 = Lowest Priority
 
 ```cpp
 #include <psched/priority_scheduler.h>
