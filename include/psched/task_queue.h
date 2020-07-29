@@ -6,7 +6,7 @@
 #include <pqsched/concurrent_queue.h>
 #include <pqsched/task.h>
 
-namespace pqsched {
+namespace psched {
 
 class TaskQueue {
   moodycamel::ConcurrentQueue<Task> queue_;
@@ -23,4 +23,4 @@ public:
 
 };
 
-} // namespace pqsched
+} // namespace psched

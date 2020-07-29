@@ -1,7 +1,7 @@
 #pragma once
 #include <chrono>
 
-namespace pqsched {
+namespace psched {
 
 
 struct TaskStats {

@@ -4,7 +4,7 @@
 #include <thread>
 #include <random>
 #include <functional>
-using namespace pqsched;
+using namespace psched;
 
 int main() {
 

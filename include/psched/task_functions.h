@@ -2,7 +2,7 @@
 #include <functional>
 #include <pqsched/task_stats.h>
 
-namespace pqsched {
+namespace psched {
 
 struct TaskFunctions {
 

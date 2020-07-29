@@ -7,7 +7,7 @@
 #include <pqsched/task_queue.h>
 #include <thread>
 
-namespace pqsched {
+namespace psched {
 
 template <size_t T> struct threads {
   constexpr static size_t value = T;
@@ -89,4 +89,4 @@ public:
 
 };
 
-} // namespace pqsched
+} // namespace psched

@@ -4,7 +4,7 @@
 #include <pqsched/task_functions.h>
 #include <pqsched/task_stats.h>
 
-namespace pqsched {
+namespace psched {
 
 class Task {
   TaskFunctions functions_;
