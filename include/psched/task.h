@@ -34,14 +34,6 @@ public:
     return *this;
   }
 
-  void set_id(size_t id) {
-    stats_.task_id = id;
-  }
-
-  void set_priority(size_t priority) {
-    stats_.task_priority = priority;
-  }
-
   template <typename Function>
   void on_execute(Function&& fn) {
     functions_.task_main = std::forward<Function>(fn);
@@ -85,10 +77,6 @@ public:
 
   bool is_done() const {
     return done_;
-  }
-
-  size_t get_priority() const {
-    return stats_.task_priority;
   }
 };
 

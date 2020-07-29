@@ -5,9 +5,6 @@
 namespace psched {
 
 struct TaskStats {
-  size_t task_id;
-  size_t task_priority;
-
   using TimePoint = std::chrono::steady_clock::time_point;
   TimePoint arrival_time;    // time point when the task is marked as 'ready' (queued)
   TimePoint start_time;      // time point when the task is about to execute (dequeued)

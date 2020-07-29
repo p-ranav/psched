@@ -63,8 +63,7 @@ public:
         t.join();
   }
 
-  void schedule(Task & task) {
-    const size_t priority = task.get_priority();
+  void schedule(Task & task, size_t priority) {
     while (running_) {
       if (priority_queues_[priority].try_push(task)) {
         break;

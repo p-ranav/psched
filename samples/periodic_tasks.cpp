@@ -11,7 +11,6 @@ int main() {
             while(true) {
                 // Generate task
                 Task t;
-                t.set_priority(4); // lowest priority
                 t.on_execute([] {
                     // execution time of task = 40ms
                     std::this_thread::sleep_for(std::chrono::milliseconds(40));
@@ -23,7 +22,7 @@ int main() {
                     std::cout << "Timer 1 fired! ";
                     std::cout << wait_time << " + " << computation_time <<  " = " << response_time << "\n";
                 });
-                scheduler.schedule(t);
+                scheduler.schedule(t, 4); // lowest priority
 
                 // Sleep for 50ms
                 std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -35,7 +34,6 @@ int main() {
             while(true) {
                 // Generate task
                 Task t;
-                t.set_priority(3); // low priority
                 t.on_execute([] {
                     // execution time of task = 80ms
                     std::this_thread::sleep_for(std::chrono::milliseconds(80));
@@ -47,7 +45,7 @@ int main() {
                     std::cout << "Timer 2 fired! ";
                     std::cout << wait_time << " + " << computation_time <<  " = " << response_time << "\n";
                 });
-                scheduler.schedule(t);
+                scheduler.schedule(t, 3); // low priority
 
                 // Sleep for 50ms
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -59,7 +57,6 @@ int main() {
             while(true) {
                 // Generate task
                 Task t;
-                t.set_priority(2); // medium priority
                 t.on_execute([] {
                     // execution time of task = 130ms
                     std::this_thread::sleep_for(std::chrono::milliseconds(130));
@@ -71,7 +68,7 @@ int main() {
                     std::cout << "Timer 3 fired! ";
                     std::cout << wait_time << " + " << computation_time <<  " = " << response_time << "\n";
                 });
-                scheduler.schedule(t);
+                scheduler.schedule(t, 2); // medium priority
 
                 // Sleep for 50ms
                 std::this_thread::sleep_for(std::chrono::milliseconds(250));
@@ -83,7 +80,6 @@ int main() {
             while(true) {
                 // Generate task
                 Task t;
-                t.set_priority(1); // high priority
                 t.on_execute([] {
                     // execution time of task = 390ms
                     std::this_thread::sleep_for(std::chrono::milliseconds(390));
@@ -95,7 +91,7 @@ int main() {
                     std::cout << "Timer 4 fired! ";
                     std::cout << wait_time << " + " << computation_time <<  " = " << response_time << "\n";
                 });
-                scheduler.schedule(t);
+                scheduler.schedule(t, 1); // high priority
 
                 // Sleep for 50ms
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -107,7 +103,6 @@ int main() {
             while(true) {
                 // Generate task
                 Task t;
-                t.set_priority(0); // highest priority
                 t.on_execute([] {
                     // execution time of task = 560ms
                     std::this_thread::sleep_for(std::chrono::milliseconds(560));
@@ -119,7 +114,7 @@ int main() {
                     std::cout << "Timer 5 fired! ";
                     std::cout << wait_time << " + " << computation_time <<  " = " << response_time << "\n";
                 });
-                scheduler.schedule(t);
+                scheduler.schedule(t, 0); // highest priority
 
                 // Sleep for 50ms
                 std::this_thread::sleep_for(std::chrono::milliseconds(1000));
