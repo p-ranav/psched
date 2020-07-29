@@ -43,10 +43,13 @@ int main() {
 
   // Schedule task periodically
   auto timer1 = std::thread([&scheduler, &t]() {
-    while (true) {
+    do {
+      // schedule task at priority level 3
+      scheduler.schedule(t, 3);
+
+      // sleep for 100ms
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
-      scheduler.schedule(t, 3); // schedule at priority level 3
-    }
+    } while(true);
   });
 
   timer1.join();
