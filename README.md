@@ -1,5 +1,6 @@
 # psched
 
+`psched` is a lightweight library that provides a priority-based task scheduler for modern C++.
 
 ## Generating Single Header
 
