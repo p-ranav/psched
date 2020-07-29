@@ -31,25 +31,26 @@ To schedule a task, create a `psched::Task`:
 
 ```cpp
 Task t;
-t.set_priority(4); // lowest priority
 
 t.on_execute([] {
-    // execution time of task = 40ms
-    std::this_thread::sleep_for(std::chrono::milliseconds(40));
+  // do work
+  std::this_thread::sleep_for(std::chrono::milliseconds(40));
 });
 
 t.on_complete([] (TaskStats stats) {
-    const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
-    const auto response_time = stats.response_time<std::chrono::milliseconds>();
-    const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
+  // task completed, print stats
+  
+  const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
+  const auto response_time = stats.response_time<std::chrono::milliseconds>();
+  const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
     
-    std::cout << "Executed task [" << stats.task_id << "] Priority = " << stats.task_priority
+  std::cout << "Executed task [" << stats.task_id << "] Priority = " << stats.task_priority
             << ", Response time = " << response_time 
             << " milliseconds, Computation time = " 
             << computation_time << " milliseconds\n";
 });
 
-scheduler.schedule(t);
+scheduler.schedule(t, 4); // schedule task at priority level 4
 ```
 
 ## Generating Single Header
