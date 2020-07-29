@@ -22,12 +22,15 @@
 using namespace psched;
 
 int main() {
+  
+  // Initialize scheduler
   PriorityScheduler<threads<8>, priority_levels<5>> scheduler;
   scheduler.start();
 
+  // Configure task
   Task t;
   t.on_execute([] {
-    // do work
+    // execution time of task = 40ms
     std::this_thread::sleep_for(std::chrono::milliseconds(40));
   });
 
@@ -38,7 +41,7 @@ int main() {
     std::cout << "Response time = " << stats.response_time() << "ms\n";
   });
 
-  // Periodic Timer 1 - 100ms period
+  // Schedule task periodically
   auto timer1 = std::thread([&scheduler, &t]() {
     while (true) {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
