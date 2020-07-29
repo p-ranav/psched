@@ -16,13 +16,10 @@ int main() {
           std::this_thread::sleep_for(std::chrono::milliseconds(40));
         });
         t.on_complete([](TaskStats stats) {
-          const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
-          const auto response_time = stats.response_time<std::chrono::milliseconds>();
-          const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
           std::cout << "Timer 1 fired! ";
-          std::cout << "Wait time = " << wait_time << "ms; ";
-          std::cout << "Computation time = " << computation_time << "ms; ";
-          std::cout << "Response time = " << response_time << "ms\n";
+          std::cout << "Wait time = " << stats.wait_time() << "ms; ";
+          std::cout << "Computation time = " << stats.computation_time() << "ms; ";
+          std::cout << "Response time = " << stats.response_time() << "ms\n";
         });
         scheduler.schedule(t, 4); // lowest priority
 
@@ -41,13 +38,10 @@ int main() {
           std::this_thread::sleep_for(std::chrono::milliseconds(80));
         });
         t.on_complete([](TaskStats stats) {
-          const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
-          const auto response_time = stats.response_time<std::chrono::milliseconds>();
-          const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
           std::cout << "Timer 2 fired! ";
-          std::cout << "Wait time = " << wait_time << "ms; ";
-          std::cout << "Computation time = " << computation_time << "ms; ";
-          std::cout << "Response time = " << response_time << "ms\n";
+          std::cout << "Wait time = " << stats.wait_time() << "ms; ";
+          std::cout << "Computation time = " << stats.computation_time() << "ms; ";
+          std::cout << "Response time = " << stats.response_time() << "ms\n";
         });
         scheduler.schedule(t, 3); // low priority
 
@@ -66,13 +60,10 @@ int main() {
           std::this_thread::sleep_for(std::chrono::milliseconds(130));
         });
         t.on_complete([](TaskStats stats) {
-          const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
-          const auto response_time = stats.response_time<std::chrono::milliseconds>();
-          const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
           std::cout << "Timer 3 fired! ";
-          std::cout << "Wait time = " << wait_time << "ms; ";
-          std::cout << "Computation time = " << computation_time << "ms; ";
-          std::cout << "Response time = " << response_time << "ms\n";
+          std::cout << "Wait time = " << stats.wait_time() << "ms; ";
+          std::cout << "Computation time = " << stats.computation_time() << "ms; ";
+          std::cout << "Response time = " << stats.response_time() << "ms\n";
         });
         scheduler.schedule(t, 2); // medium priority
 
@@ -91,13 +82,10 @@ int main() {
           std::this_thread::sleep_for(std::chrono::milliseconds(390));
         });
         t.on_complete([](TaskStats stats) {
-          const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
-          const auto response_time = stats.response_time<std::chrono::milliseconds>();
-          const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
           std::cout << "Timer 4 fired! ";
-          std::cout << "Wait time = " << wait_time << "ms; ";
-          std::cout << "Computation time = " << computation_time << "ms; ";
-          std::cout << "Response time = " << response_time << "ms\n";
+          std::cout << "Wait time = " << stats.wait_time() << "ms; ";
+          std::cout << "Computation time = " << stats.computation_time() << "ms; ";
+          std::cout << "Response time = " << stats.response_time() << "ms\n";
         });
         scheduler.schedule(t, 1); // high priority
 
@@ -116,13 +104,10 @@ int main() {
           std::this_thread::sleep_for(std::chrono::milliseconds(560));
         });
         t.on_complete([](TaskStats stats) {
-          const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
-          const auto response_time = stats.response_time<std::chrono::milliseconds>();
-          const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
           std::cout << "Timer 5 fired! ";
-          std::cout << "Wait time = " << wait_time << "ms; ";
-          std::cout << "Computation time = " << computation_time << "ms; ";
-          std::cout << "Response time = " << response_time << "ms\n";
+          std::cout << "Wait time = " << stats.wait_time() << "ms; ";
+          std::cout << "Computation time = " << stats.computation_time() << "ms; ";
+          std::cout << "Response time = " << stats.response_time() << "ms\n";
         });
         scheduler.schedule(t, 0); // highest priority
 
