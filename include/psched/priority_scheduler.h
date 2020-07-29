@@ -3,8 +3,8 @@
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
-#include <pqsched/task.h>
-#include <pqsched/task_queue.h>
+#include <psched/task.h>
+#include <psched/task_queue.h>
 #include <thread>
 
 namespace psched {

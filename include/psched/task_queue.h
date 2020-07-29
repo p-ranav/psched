@@ -3,8 +3,8 @@
 #include <iostream>
 #include <mutex>
 #include <queue>
-#include <pqsched/concurrent_queue.h>
-#include <pqsched/task.h>
+#include <psched/concurrent_queue.h>
+#include <psched/task.h>
 
 namespace psched {
 

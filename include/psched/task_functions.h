@@ -1,6 +1,6 @@
 #pragma once
 #include <functional>
-#include <pqsched/task_stats.h>
+#include <psched/task_stats.h>
 
 namespace psched {
 

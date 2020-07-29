@@ -1,8 +1,8 @@
 #pragma once
 #include <atomic>
 #include <functional>
-#include <pqsched/task_functions.h>
-#include <pqsched/task_stats.h>
+#include <psched/task_functions.h>
+#include <psched/task_stats.h>
 
 namespace psched {
 

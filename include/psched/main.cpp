@@ -1,6 +1,6 @@
 #include <chrono>
 #include <iostream>
-#include <pqsched/priority_scheduler.h>
+#include <psched/priority_scheduler.h>
 #include <thread>
 #include <random>
 #include <functional>
