@@ -25,7 +25,13 @@ template <class threads, class priority_levels> class PriorityScheduler {
   std::condition_variable ready_;
 
   void run() {
+    bool first_task = true;
     while (running_) {
+      if (first_task) {
+        std::unique_lock<std::mutex> lock{mutex_};
+        ready_.wait(lock);
+        first_task = false;
+      }
       Task task;
       bool dequeued = false;
 
