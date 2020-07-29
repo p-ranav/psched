@@ -63,8 +63,8 @@ public:
   }
 
   void operator()() {
+    stats_.start_time = std::chrono::steady_clock::now();
     try {
-      stats_.start_time = std::chrono::steady_clock::now();
       if (functions_.task_main) {
         functions_.task_main();
       }
