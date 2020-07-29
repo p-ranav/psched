@@ -21,6 +21,8 @@ template <class threads, class priority_levels> class PriorityScheduler {
   std::vector<std::thread> threads_;
   std::array<TaskQueue, priority_levels::value> priority_queues_;
   std::atomic_bool running_{false};
+  std::mutex mutex_;
+  std::condition_variable ready_;
 
   void run() {
     while (running_) {
@@ -28,35 +30,40 @@ template <class threads, class priority_levels> class PriorityScheduler {
       bool dequeued = false;
 
       // Start from highest priority queue
-      for (size_t i = 0; i < priority_levels::value; i++) {
-        // Try to pop an item
-        if (priority_queues_[i].try_pop(task)) {
-          dequeued = true;
-          break;
+      do {
+        for (size_t i = 0; i < priority_levels::value; i++) {
+          // Try to pop an item
+          if (priority_queues_[i].try_pop(task)) {
+            dequeued = true;
+            break;
+          }
         }
-      }
-
-      if (!dequeued)
-        continue;
+      } while(!dequeued);
 
       // execute task
       task();
+
+      // Wait for the `enqueued` signal
+      std::unique_lock<std::mutex> lock{mutex_};
+      ready_.wait(lock);
     }
   }
 
 public:
   ~PriorityScheduler() {
     for (auto &t : threads_)
-      t.join();
+      if (t.joinable())
+        t.join();
   }
 
   void schedule(Task & task) {
     const size_t priority = task.get_priority();
-    while (true) {
+    while (running_) {
       if (priority_queues_[priority].try_push(task)) {
         break;
       }
     }
+    ready_.notify_one();
   }
 
   void start() {
@@ -70,7 +77,8 @@ public:
   void stop() {
     running_ = false;
     for (auto &t : threads_)
-      t.join();
+      if (t.joinable())
+        t.join();
   }
 
 };

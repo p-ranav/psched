@@ -15,9 +15,9 @@ int main() {
   auto random_priority = [&]() { return distr(gen); };
 
   std::cout << "Scheduler Test 1\n";
+  PriorityScheduler<threads<5>, priority_levels<10>> scheduler;
+  scheduler.start();
   {
-    PriorityScheduler<threads<5>, priority_levels<10>> scheduler;
-    scheduler.start();
 
     // schedule task every 100ms
     auto t1 = std::thread([&]() {
@@ -126,7 +126,8 @@ int main() {
     t1.join();
     t2.join();
     t3.join();
-
-    scheduler.stop();
   }
+
+  std::this_thread::sleep_for(std::chrono::seconds(5));
+  std::cout << "All tasks completed\n";
 }
