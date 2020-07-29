@@ -3751,22 +3751,27 @@ inline void swap(typename ConcurrentQueue<T, Traits>::ImplicitProducerKVP& a, ty
 namespace psched {
 
 struct TaskStats {
-  size_t task_id;
-  size_t task_priority;
-
   using TimePoint = std::chrono::steady_clock::time_point;
   TimePoint arrival_time;    // time point when the task is marked as 'ready' (queued)
   TimePoint start_time;      // time point when the task is about to execute (dequeued)
   TimePoint end_time;        // time point when the task completes execution
 
+  // Time spent waiting in the queue
   template <typename T>
-  long long response_time() const {
-    return std::chrono::duration_cast<T>(end_time - arrival_time).count();
+  long long wait_time() const {
+    return std::chrono::duration_cast<T>(start_time - arrival_time).count();
   }
 
+  // Time taken to execute the task main function (see task_functions.h)
   template <typename T>
   long long computation_time() const {
     return std::chrono::duration_cast<T>(end_time - start_time).count();
+  }
+
+  // wait_time() + computation_time()
+  template <typename T>
+  long long response_time() const {
+    return std::chrono::duration_cast<T>(end_time - arrival_time).count();
   }
 };
 
@@ -3796,22 +3801,27 @@ struct TaskFunctions {
 namespace psched {
 
 struct TaskStats {
-  size_t task_id;
-  size_t task_priority;
-
   using TimePoint = std::chrono::steady_clock::time_point;
   TimePoint arrival_time;    // time point when the task is marked as 'ready' (queued)
   TimePoint start_time;      // time point when the task is about to execute (dequeued)
   TimePoint end_time;        // time point when the task completes execution
 
+  // Time spent waiting in the queue
   template <typename T>
-  long long response_time() const {
-    return std::chrono::duration_cast<T>(end_time - arrival_time).count();
+  long long wait_time() const {
+    return std::chrono::duration_cast<T>(start_time - arrival_time).count();
   }
 
+  // Time taken to execute the task main function (see task_functions.h)
   template <typename T>
   long long computation_time() const {
     return std::chrono::duration_cast<T>(end_time - start_time).count();
+  }
+
+  // wait_time() + computation_time()
+  template <typename T>
+  long long response_time() const {
+    return std::chrono::duration_cast<T>(end_time - arrival_time).count();
   }
 };
 
@@ -3849,14 +3859,6 @@ public:
     std::swap(functions_, other.functions_);
     std::swap(stats_, other.stats_);
     return *this;
-  }
-
-  void set_id(size_t id) {
-    stats_.task_id = id;
-  }
-
-  void set_priority(size_t priority) {
-    stats_.task_priority = priority;
   }
 
   template <typename Function>
@@ -3902,10 +3904,6 @@ public:
 
   bool is_done() const {
     return done_;
-  }
-
-  size_t get_priority() const {
-    return stats_.task_priority;
   }
 };
 
@@ -4000,8 +3998,7 @@ public:
         t.join();
   }
 
-  void schedule(Task & task) {
-    const size_t priority = task.get_priority();
+  void schedule(Task & task, size_t priority) {
     while (running_) {
       if (priority_queues_[priority].try_push(task)) {
         break;

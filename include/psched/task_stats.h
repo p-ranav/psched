@@ -27,7 +27,6 @@ struct TaskStats {
   long long response_time() const {
     return std::chrono::duration_cast<T>(end_time - arrival_time).count();
   }
-
 };
 
 }
