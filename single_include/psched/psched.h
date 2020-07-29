@@ -3741,3 +3741,289 @@ inline void swap(typename ConcurrentQueue<T, Traits>::ImplicitProducerKVP& a, ty
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
+
+#pragma once
+#include <functional>
+// #include <psched/task_stats.h>
+
+#include <chrono>
+
+namespace psched {
+
+struct TaskStats {
+  size_t task_id;
+  size_t task_priority;
+
+  using TimePoint = std::chrono::steady_clock::time_point;
+  TimePoint arrival_time;    // time point when the task is marked as 'ready' (queued)
+  TimePoint start_time;      // time point when the task is about to execute (dequeued)
+  TimePoint end_time;        // time point when the task completes execution
+
+  template <typename T>
+  long long response_time() const {
+    return std::chrono::duration_cast<T>(end_time - arrival_time).count();
+  }
+
+  template <typename T>
+  long long computation_time() const {
+    return std::chrono::duration_cast<T>(end_time - start_time).count();
+  }
+};
+
+}
+
+namespace psched {
+
+struct TaskFunctions {
+  // Called when the task is (finally) executed by an executor thread
+  std::function<void()> task_main;
+
+  // Called after the task has completed executing.
+  // In case of exception, `task_error` is called first
+  //
+  // TaskStats argument can be used to get task computation_time
+  // and task response_time.
+  std::function<void(TaskStats)> task_end;
+
+  // Called if `task_main()` throws an exception
+  std::function<void(TaskStats, const char *)> task_error;
+};
+
+}
+#pragma once
+#include <chrono>
+
+namespace psched {
+
+struct TaskStats {
+  size_t task_id;
+  size_t task_priority;
+
+  using TimePoint = std::chrono::steady_clock::time_point;
+  TimePoint arrival_time;    // time point when the task is marked as 'ready' (queued)
+  TimePoint start_time;      // time point when the task is about to execute (dequeued)
+  TimePoint end_time;        // time point when the task completes execution
+
+  template <typename T>
+  long long response_time() const {
+    return std::chrono::duration_cast<T>(end_time - arrival_time).count();
+  }
+
+  template <typename T>
+  long long computation_time() const {
+    return std::chrono::duration_cast<T>(end_time - start_time).count();
+  }
+};
+
+}
+#pragma once
+#include <atomic>
+#include <functional>
+// #include <psched/task_functions.h>
+// #include <psched/task_stats.h>
+
+namespace psched {
+
+class Task {
+  TaskFunctions functions_;
+  TaskStats stats_;
+  std::atomic_bool done_{false};
+
+  friend class TaskQueue;
+
+protected:
+  void save_arrival_time() {
+    stats_.arrival_time = std::chrono::steady_clock::now();
+  }
+
+public:
+
+  Task() {}
+
+  Task(const Task & other) {
+    functions_ = other.functions_;
+    stats_ = other.stats_;
+  }
+
+  Task& operator=(Task other) {
+    std::swap(functions_, other.functions_);
+    std::swap(stats_, other.stats_);
+    return *this;
+  }
+
+  void set_id(size_t id) {
+    stats_.task_id = id;
+  }
+
+  void set_priority(size_t priority) {
+    stats_.task_priority = priority;
+  }
+
+  template <typename Function>
+  void on_execute(Function&& fn) {
+    functions_.task_main = std::forward<Function>(fn);
+  }
+
+  template <typename Function>
+  void on_complete(Function&& fn) {
+    functions_.task_end = std::forward<Function>(fn);
+  }
+
+  template <typename Function>
+  void on_error(Function&& fn) {
+    functions_.task_error = std::forward<Function>(fn);
+  }
+
+  void operator()() {
+    stats_.start_time = std::chrono::steady_clock::now();
+    try {
+      if (functions_.task_main) {
+        functions_.task_main();
+      }
+      stats_.end_time = std::chrono::steady_clock::now();
+      done_ = true;
+    } 
+    catch (std::exception & e) {
+      stats_.end_time = std::chrono::steady_clock::now();
+      if (functions_.task_error) {
+        functions_.task_error(stats_, e.what());
+      }
+    }
+    catch (...) {
+      stats_.end_time = std::chrono::steady_clock::now();
+      if (functions_.task_error) {
+        functions_.task_error(stats_, "Unknown exception");
+      }
+    }
+    if (functions_.task_end) {
+      functions_.task_end(stats_);
+    }
+  }
+
+  bool is_done() const {
+    return done_;
+  }
+
+  size_t get_priority() const {
+    return stats_.task_priority;
+  }
+};
+
+}
+#pragma once
+#include <condition_variable>
+#include <iostream>
+#include <mutex>
+#include <queue>
+// #include <psched/concurrent_queue.h>
+// #include <psched/task.h>
+
+namespace psched {
+
+class TaskQueue {
+  moodycamel::ConcurrentQueue<Task> queue_;
+
+public:
+  bool try_pop(Task &task) {
+    return queue_.try_dequeue(task);
+  }
+
+  bool try_push(Task &task) {
+    task.save_arrival_time();
+    return queue_.enqueue(task);
+  }
+};
+
+} // namespace psched
+
+#pragma once
+#include <array>
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+// #include <psched/task.h>
+// #include <psched/task_queue.h>
+#include <thread>
+
+namespace psched {
+
+template <size_t T> struct threads {
+  constexpr static size_t value = T;
+};
+
+template <size_t P> struct priority_levels {
+  constexpr static size_t value = P;
+};
+
+template <class threads, class priority_levels> class PriorityScheduler {
+  std::vector<std::thread> threads_;
+  std::array<TaskQueue, priority_levels::value> priority_queues_;
+  std::atomic_bool running_{false};
+  std::mutex mutex_;
+  std::condition_variable ready_;
+
+  void run() {
+    bool first_task = true;
+    while (running_) {
+      if (first_task) {
+        std::unique_lock<std::mutex> lock{mutex_};
+        ready_.wait(lock);
+        first_task = false;
+      }
+      Task task;
+      bool dequeued = false;
+
+      // Start from highest priority queue
+      do {
+        for (size_t i = 0; i < priority_levels::value; i++) {
+          // Try to pop an item
+          if (priority_queues_[i].try_pop(task)) {
+            dequeued = true;
+            break;
+          }
+        }
+      } while(!dequeued);
+
+      // execute task
+      task();
+
+      // Wait for the `enqueued` signal
+      std::unique_lock<std::mutex> lock{mutex_};
+      ready_.wait(lock);
+    }
+  }
+
+public:
+  ~PriorityScheduler() {
+    for (auto &t : threads_)
+      if (t.joinable())
+        t.join();
+  }
+
+  void schedule(Task & task) {
+    const size_t priority = task.get_priority();
+    while (running_) {
+      if (priority_queues_[priority].try_push(task)) {
+        break;
+      }
+    }
+    ready_.notify_one();
+  }
+
+  void start() {
+    running_ = true;
+    for (unsigned n = 0; n != threads::value; ++n) {
+      std::cout << "Starting thread " << n << "\n";
+      threads_.emplace_back([this] { run(); });
+    }
+  }
+
+  void stop() {
+    running_ = false;
+    for (auto &t : threads_)
+      if (t.joinable())
+        t.join();
+  }
+};
+
+} // namespace psched

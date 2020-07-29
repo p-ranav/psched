@@ -1,0 +1,13 @@
+{
+    "project": "Priority Scheduling for Modern C++",
+    "target": "single_include/psched/psched.h",
+    "sources": [
+        "include/psched/concurrent_queue.h",
+        "include/psched/task_functions.h",
+        "include/psched/task_stats.h",
+        "include/psched/task.h",
+        "include/psched/task_queue.h",
+        "include/psched/priority_scheduler.h"
+    ],
+    "include_paths": ["include"]
+}
