@@ -23,9 +23,11 @@
 using namespace psched;
 
 int main() {
+  // Initialize scheduler
   PriorityScheduler<threads<4>, priority_levels<5>> scheduler;
   scheduler.start();
 
+  // Configure task
   Task my_task;
   my_task.on_execute([] {
     // execution time of task = 40ms
@@ -46,7 +48,7 @@ int main() {
   auto timer1 = std::thread([&scheduler, &my_task]() {
     while (true) {
 
-      // schedule task at priority level 3
+      // Schedule task at priority level 3
       scheduler.schedule(my_task, 3);
 
       // Sleep for 100ms
