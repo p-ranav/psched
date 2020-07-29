@@ -79,7 +79,9 @@ int main() {
         const auto response_time = stats.response_time<std::chrono::milliseconds>();
         const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
         std::cout << "Timer 1 fired! ";
-        std::cout << wait_time << " + " << computation_time << " = " << response_time << "\n";
+        std::cout << "Wait time = " << wait_time << "ms; ";
+        std::cout << "Computation time = " << computation_time << "ms; ";
+        std::cout << "Response time = " << response_time << "ms\n";
       });
       
       scheduler.schedule(t, 3); // schedule task at priority level 3
