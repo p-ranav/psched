@@ -200,6 +200,7 @@ int main() {
 ```
 
 ```bash
+▶ ./multiple_periodic_tasks
 [Lowest ] Priority Log Message Wait time = 0ms; Computation time = 40ms; Response time = 40ms
 [Lowest ] Priority Log Message Wait time = 0ms; Computation time = 43ms; Response time = 43ms
 [Medium ] Priority Log Message Wait time = 0ms; Computation time = 131ms; Response time = 131ms
