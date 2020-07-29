@@ -4,7 +4,16 @@
 
 ## Getting Started
 
-To get started, create a `PriorityScheduler`
+The design of the priority scheduler is as follows:
+* The priority scheduler manages an array of concurrent queues, each queue assigned a priority-level
+* Each task, when scheduled, is enqueued onto one of queues based on the task's priority
+* A pool of threads is executing tasks, starting with the highest priority
+
+<p align="center">
+  <img height="400" src="img/priority_scheduling.png"/>  
+</p>
+
+To get started, create a `PriorityScheduler`. 
 
 ```cpp
 #include <psched/priority_scheduler.h>
@@ -14,10 +23,6 @@ int main() {
   PriorityScheduler<<threads<4>, priority_levels<5>> scheduler;
 }
 ```
-
-<p align="center">
-  <img height="400" src="img/priority_scheduling.png"/>  
-</p>
 
 ## Generating Single Header
 
