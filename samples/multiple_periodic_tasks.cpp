@@ -20,9 +20,9 @@ int main() {
         });
         t.on_complete([](TaskStats stats) {
           std::cout << "[Lowest ] Priority Log Message ";
-          std::cout << "Wait time = " << stats.wait_time() << "ms; ";
-          std::cout << "Computation time = " << stats.computation_time() << "ms; ";
-          std::cout << "Response time = " << stats.response_time() << "ms\n";
+          std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
+          std::cout << "Burst time = " << stats.burst_time() << "ms; ";
+          std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
         });
         scheduler.schedule(t, 4); // lowest priority
       }
@@ -42,9 +42,9 @@ int main() {
         });
         t.on_complete([](TaskStats stats) {
           std::cout << "[Low    ] Priority Log Message ";
-          std::cout << "Wait time = " << stats.wait_time() << "ms; ";
-          std::cout << "Computation time = " << stats.computation_time() << "ms; ";
-          std::cout << "Response time = " << stats.response_time() << "ms\n";
+          std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
+          std::cout << "Burst time = " << stats.burst_time() << "ms; ";
+          std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
         });
         scheduler.schedule(t, 3); // low priority
       }
@@ -64,9 +64,9 @@ int main() {
         });
         t.on_complete([](TaskStats stats) {
           std::cout << "[Medium ] Priority Log Message ";
-          std::cout << "Wait time = " << stats.wait_time() << "ms; ";
-          std::cout << "Computation time = " << stats.computation_time() << "ms; ";
-          std::cout << "Response time = " << stats.response_time() << "ms\n";
+          std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
+          std::cout << "Burst time = " << stats.burst_time() << "ms; ";
+          std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
         });
         scheduler.schedule(t, 2); // medium priority
       }
@@ -86,9 +86,9 @@ int main() {
         });
         t.on_complete([](TaskStats stats) {
           std::cout << "[High   ] Priority Log Message ";
-          std::cout << "Wait time = " << stats.wait_time() << "ms; ";
-          std::cout << "Computation time = " << stats.computation_time() << "ms; ";
-          std::cout << "Response time = " << stats.response_time() << "ms\n";
+          std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
+          std::cout << "Burst time = " << stats.burst_time() << "ms; ";
+          std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
         });
         scheduler.schedule(t, 1); // high priority
       }
@@ -108,9 +108,9 @@ int main() {
         });
         t.on_complete([](TaskStats stats) {
           std::cout << "[Highest] Priority Log Message ";
-          std::cout << "Wait time = " << stats.wait_time() << "ms; ";
-          std::cout << "Computation time = " << stats.computation_time() << "ms; ";
-          std::cout << "Response time = " << stats.response_time() << "ms\n";
+          std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
+          std::cout << "Burst time = " << stats.burst_time() << "ms; ";
+          std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
         });
         scheduler.schedule(t, 0); // highest priority
       }

@@ -16,9 +16,9 @@ int main() {
 
   t.on_complete([](TaskStats stats) {
     std::cout << "Timer 1 fired! ";
-    std::cout << "Wait time = " << stats.wait_time() << "ms; ";
-    std::cout << "Computation time = " << stats.computation_time() << "ms; ";
-    std::cout << "Response time = " << stats.response_time() << "ms\n";
+    std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
+    std::cout << "Burst time = " << stats.burst_time() << "ms; ";
+    std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
   });
 
   // Schedule task periodically
