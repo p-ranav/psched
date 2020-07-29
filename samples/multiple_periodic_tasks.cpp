@@ -19,7 +19,7 @@ int main() {
           std::this_thread::sleep_for(std::chrono::milliseconds(40));
         });
         t.on_complete([](TaskStats stats) {
-          std::cout << "Timer 1 fired! ";
+          std::cout << "[Lowest ] Priority Log Message ";
           std::cout << "Wait time = " << stats.wait_time() << "ms; ";
           std::cout << "Computation time = " << stats.computation_time() << "ms; ";
           std::cout << "Response time = " << stats.response_time() << "ms\n";
@@ -41,7 +41,7 @@ int main() {
           std::this_thread::sleep_for(std::chrono::milliseconds(80));
         });
         t.on_complete([](TaskStats stats) {
-          std::cout << "Timer 2 fired! ";
+          std::cout << "[Low    ] Priority Log Message ";
           std::cout << "Wait time = " << stats.wait_time() << "ms; ";
           std::cout << "Computation time = " << stats.computation_time() << "ms; ";
           std::cout << "Response time = " << stats.response_time() << "ms\n";
@@ -63,7 +63,7 @@ int main() {
           std::this_thread::sleep_for(std::chrono::milliseconds(130));
         });
         t.on_complete([](TaskStats stats) {
-          std::cout << "Timer 3 fired! ";
+          std::cout << "[Medium ] Priority Log Message ";
           std::cout << "Wait time = " << stats.wait_time() << "ms; ";
           std::cout << "Computation time = " << stats.computation_time() << "ms; ";
           std::cout << "Response time = " << stats.response_time() << "ms\n";
@@ -85,7 +85,7 @@ int main() {
           std::this_thread::sleep_for(std::chrono::milliseconds(390));
         });
         t.on_complete([](TaskStats stats) {
-          std::cout << "Timer 4 fired! ";
+          std::cout << "[High   ] Priority Log Message ";
           std::cout << "Wait time = " << stats.wait_time() << "ms; ";
           std::cout << "Computation time = " << stats.computation_time() << "ms; ";
           std::cout << "Response time = " << stats.response_time() << "ms\n";
@@ -99,7 +99,7 @@ int main() {
       while (true) {
         // Sleep for 50ms
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        
+
         // Generate task
         Task t;
         t.on_execute([] {
@@ -107,7 +107,7 @@ int main() {
           std::this_thread::sleep_for(std::chrono::milliseconds(560));
         });
         t.on_complete([](TaskStats stats) {
-          std::cout << "Timer 5 fired! ";
+          std::cout << "[Highest] Priority Log Message ";
           std::cout << "Wait time = " << stats.wait_time() << "ms; ";
           std::cout << "Computation time = " << stats.computation_time() << "ms; ";
           std::cout << "Response time = " << stats.response_time() << "ms\n";
