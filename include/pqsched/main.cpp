@@ -16,15 +16,17 @@ int main() {
 
   std::cout << "Scheduler Test 1\n";
   {
-    PriorityScheduler<10> scheduler;
+    PriorityScheduler<threads<5>, priority_levels<10>> scheduler;
+    scheduler.start();
 
     // schedule task every 100ms
     auto t1 = std::thread([&]() {
-      for (size_t i = 0; i < 500; ++i) {
+      for (size_t i = 0; i < 5; ++i) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         const auto priority = random_priority();
 
         Task task;
+        task.set_id(i);
         task.set_priority(priority);
         task.on_execute( 
           [&]() {
@@ -33,10 +35,10 @@ int main() {
         });
 
         task.on_complete(
-          [&](TaskStats stats) {
+          [](TaskStats stats) {
             const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
             const auto response_time = stats.response_time<std::chrono::milliseconds>();
-            std::cout << "Executed task " << i 
+            std::cout << "Executed task [" << stats.task_id << "] Priority = " << stats.task_priority
                       << ". Response time = " << response_time 
                       << " milliseconds, Computation time = " 
                       << computation_time << " milliseconds\n";
@@ -53,74 +55,78 @@ int main() {
       }
     });
 
-    // // schedule task every 50ms
-    // auto t2 = std::thread([&]() {
-    //   for (size_t j = 0; j < 500; ++j) {
-    //     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    //     const auto priority = random_priority();
+    // schedule task every 50ms
+    auto t2 = std::thread([&]() {
+      for (size_t i = 0; i < 500; ++i) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        const auto priority = random_priority();
 
-    //     Task task;
-    //     task.set_priority(priority);
-    //     task.on_execute( 
-    //       [&]() {
-    //         std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
-    //     });
-    //     task.on_complete(
-    //       [&](TaskStats stats) {
-    //         // const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
-    //         // const auto response_time = stats.response_time<std::chrono::milliseconds>();
-    //         // std::cout << "Executed task " << j
-    //         //           << ". Response time = " << response_time 
-    //         //           << " milliseconds, Computation time = " 
-    //         //           << computation_time << " milliseconds\n";
-    //       }
-    //     );
-    //     task.on_error(
-    //       [](TaskStats stats, const char * error) {
-    //         std::cout << error << "\n";
-    //       }
-    //     );
+        Task task;
+        task.set_id(i);
+        task.set_priority(priority);
+        task.on_execute( 
+          [&]() {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
+        });
+        task.on_complete(
+          [](TaskStats stats) {
+            const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
+            const auto response_time = stats.response_time<std::chrono::milliseconds>();
+            std::cout << "Executed task [" << stats.task_id << "] Priority = " << stats.task_priority
+                      << ". Response time = " << response_time 
+                      << " milliseconds, Computation time = " 
+                      << computation_time << " milliseconds\n";
+          }
+        );
+        task.on_error(
+          [](TaskStats stats, const char * error) {
+            std::cout << error << "\n";
+          }
+        );
 
-    //     scheduler.schedule(task);
+        scheduler.schedule(task);
 
-    //   }
-    // });
+      }
+    });
 
-    // // schedule task every 200ms
-    // auto t3 = std::thread([&]() {
-    //   for (size_t k = 0; k < 500; ++k) {
-    //     std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    //     const auto priority = random_priority();
+    // schedule task every 200ms
+    auto t3 = std::thread([&]() {
+      for (size_t i = 0; i < 140; ++i) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        const auto priority = random_priority();
 
-    //     Task task;
-    //     task.set_priority(priority);
-    //     task.on_execute( 
-    //       [&]() {
-    //         std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
-    //     });
-    //     task.on_complete(
-    //       [&](TaskStats stats) {
-    //         // const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
-    //         // const auto response_time = stats.response_time<std::chrono::milliseconds>();
-    //         // std::cout << "Executed task " << k
-    //         //           << ". Response time = " << response_time 
-    //         //           << " milliseconds, Computation time = " 
-    //         //           << computation_time << " milliseconds\n";
-    //       }
-    //     );
-    //     task.on_error(
-    //       [](TaskStats stats, const char * error) {
-    //         std::cout << error << "\n";
-    //       }
-    //     );
+        Task task;
+        task.set_id(i);
+        task.set_priority(priority);
+        task.on_execute( 
+          [&]() {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
+        });
+        task.on_complete(
+          [](TaskStats stats) {
+            const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
+            const auto response_time = stats.response_time<std::chrono::milliseconds>();
+            std::cout << "Executed task [" << stats.task_id << "] Priority = " << stats.task_priority
+                      << ". Response time = " << response_time 
+                      << " milliseconds, Computation time = " 
+                      << computation_time << " milliseconds\n";
+          }
+        );
+        task.on_error(
+          [](TaskStats stats, const char * error) {
+            std::cout << error << "\n";
+          }
+        );
 
-    //     scheduler.schedule(task);
+        scheduler.schedule(task);
 
-    //   }
-    // });
+      }
+    });
 
     t1.join();
-    // t2.join();
-    // t3.join();
+    t2.join();
+    t3.join();
+
+    scheduler.stop();
   }
 }

@@ -7,8 +7,6 @@
 namespace pqsched {
 
 class Task {
-  size_t id_;
-  size_t priority_;
   TaskFunctions functions_;
   TaskStats stats_;
   std::atomic_bool done_{false};
@@ -22,29 +20,25 @@ protected:
 
 public:
 
-  Task() : id_(0), priority_(0) {}
+  Task() {}
 
   Task(const Task & other) {
-    id_ = other.id_;
-    priority_ = other.priority_;
     functions_ = other.functions_;
     stats_ = other.stats_;
   }
 
   Task& operator=(Task other) {
-    std::swap(id_, other.id_);
-    std::swap(priority_, other.priority_);
     std::swap(functions_, other.functions_);
     std::swap(stats_, other.stats_);
     return *this;
   }
 
   void set_id(size_t id) {
-    id_ = id;
+    stats_.task_id = id;
   }
 
   void set_priority(size_t priority) {
-    priority_ = priority;
+    stats_.task_priority = priority;
   }
 
   template <typename Function>
@@ -93,7 +87,7 @@ public:
   }
 
   size_t get_priority() const {
-    return priority_;
+    return stats_.task_priority;
   }
 
 };
