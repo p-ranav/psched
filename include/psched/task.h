@@ -15,37 +15,31 @@ class Task {
   friend class TaskQueue;
 
 protected:
-  void save_arrival_time() {
-    stats_.arrival_time = std::chrono::steady_clock::now();
-  }
+  void save_arrival_time() { stats_.arrival_time = std::chrono::steady_clock::now(); }
 
 public:
-
   Task() {}
 
-  Task(const Task & other) {
+  Task(const Task &other) {
     functions_ = other.functions_;
     stats_ = other.stats_;
   }
 
-  Task& operator=(Task other) {
+  Task &operator=(Task other) {
     std::swap(functions_, other.functions_);
     std::swap(stats_, other.stats_);
     return *this;
   }
 
-  template <typename Function>
-  void on_execute(Function&& fn) {
+  template <typename Function> void on_execute(Function &&fn) {
     functions_.task_main = std::forward<Function>(fn);
   }
 
-  template <typename Function>
-  void on_complete(Function&& fn) {
+  template <typename Function> void on_complete(Function &&fn) {
     functions_.task_end = std::forward<Function>(fn);
   }
 
-  template <typename Function>
-  void on_error(Function&& fn) {
+  template <typename Function> void on_error(Function &&fn) {
     functions_.task_error = std::forward<Function>(fn);
   }
 
@@ -57,14 +51,12 @@ public:
       }
       stats_.end_time = std::chrono::steady_clock::now();
       done_ = true;
-    } 
-    catch (std::exception & e) {
+    } catch (std::exception &e) {
       stats_.end_time = std::chrono::steady_clock::now();
       if (functions_.task_error) {
         functions_.task_error(stats_, e.what());
       }
-    }
-    catch (...) {
+    } catch (...) {
       stats_.end_time = std::chrono::steady_clock::now();
       if (functions_.task_error) {
         functions_.task_error(stats_, "Unknown exception");
@@ -75,9 +67,7 @@ public:
     }
   }
 
-  bool is_done() const {
-    return done_;
-  }
+  bool is_done() const { return done_; }
 };
 
-}
+} // namespace psched

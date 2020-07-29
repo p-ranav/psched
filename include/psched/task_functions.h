@@ -20,4 +20,4 @@ struct TaskFunctions {
   std::function<void(TaskStats, const char *)> task_error;
 };
 
-}
+} // namespace psched

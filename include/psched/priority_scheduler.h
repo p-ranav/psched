@@ -10,13 +10,9 @@
 
 namespace psched {
 
-template <size_t T> struct threads {
-  constexpr static size_t value = T;
-};
+template <size_t T> struct threads { constexpr static size_t value = T; };
 
-template <size_t P> struct priority_levels {
-  constexpr static size_t value = P;
-};
+template <size_t P> struct priority_levels { constexpr static size_t value = P; };
 
 template <class threads, class priority_levels> class PriorityScheduler {
   std::vector<std::thread> threads_;
@@ -45,7 +41,7 @@ template <class threads, class priority_levels> class PriorityScheduler {
             break;
           }
         }
-      } while(!dequeued);
+      } while (!dequeued);
 
       // execute task
       task();
@@ -63,7 +59,12 @@ public:
         t.join();
   }
 
-  void schedule(Task & task, size_t priority) {
+  void schedule(Task &task, size_t priority) {
+    if (priority >= priority_levels::value) {
+      throw std::runtime_error("Error: Priority " + std::to_string(priority) +
+                               " is out of range. Priority should be in range [0, " +
+                               std::to_string(priority_levels::value - 1) + "]");
+    }
     while (running_) {
       if (priority_queues_[priority].try_push(task)) {
         break;
