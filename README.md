@@ -59,7 +59,7 @@ int main() {
 * ***Wait time***: Duration of time for which the task is waiting in the queue.
 * ***Computation time***: Duration of time taken for the task to execute once it's dequeued by a worker thread.
 * ***Response time***: Duration of time taken to complete the task, once the task is marked as "ready". 
-  - This is `wait_time + computation_time`.
+  - `response_time = wait_time + computation_time`
 
 ```bash
 ▶ ./single_periodic_task
