@@ -28,7 +28,7 @@ int main() {
 
   Task t;
   t.on_execute([] {
-    // execution time of task = 40ms
+    // do work
     std::this_thread::sleep_for(std::chrono::milliseconds(40));
   });
 
