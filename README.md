@@ -6,7 +6,6 @@
 
 The design of the priority scheduler is as follows:
 * The priority scheduler manages an array of concurrent queues, each queue assigned a priority-level
-* A _task_ is a piece of work to be done or undertaken.
 * A task, when scheduled, is enqueued onto one of queues based on the task's priority
 * A pool of threads executes ready tasks, starting with the highest priority
 
