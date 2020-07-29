@@ -89,7 +89,6 @@ public:
   size_t get_priority() const {
     return stats_.task_priority;
   }
-
 };
 
 }

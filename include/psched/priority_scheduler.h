@@ -86,7 +86,6 @@ public:
       if (t.joinable())
         t.join();
   }
-
 };
 
 } // namespace psched

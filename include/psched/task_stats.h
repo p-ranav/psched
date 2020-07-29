@@ -3,7 +3,6 @@
 
 namespace psched {
 
-
 struct TaskStats {
   size_t task_id;
   size_t task_priority;
@@ -22,7 +21,6 @@ struct TaskStats {
   long long computation_time() const {
     return std::chrono::duration_cast<T>(end_time - start_time).count();
   }
-
 };
 
 }

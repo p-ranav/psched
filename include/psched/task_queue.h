@@ -20,7 +20,6 @@ public:
     task.save_arrival_time();
     return queue_.enqueue(task);
   }
-
 };
 
 } // namespace psched

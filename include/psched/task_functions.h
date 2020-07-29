@@ -5,7 +5,6 @@
 namespace psched {
 
 struct TaskFunctions {
-
   // Called when the task is (finally) executed by an executor thread
   std::function<void()> task_main;
 
