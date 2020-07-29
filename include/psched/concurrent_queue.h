@@ -265,7 +265,7 @@ inline thread_id_t thread_id() {
     !defined(__aarch64__)
 // Assume `thread_local` is fully supported in all other C++11 compilers/platforms
 //#define MOODYCAMEL_CPP11_THREAD_LOCAL_SUPPORTED    // always disabled for now since several users
-//report having problems with it on
+// report having problems with it on
 #endif
 #endif
 #endif
@@ -1450,7 +1450,7 @@ private:
   // destroyed), and fairly speedy under low contention.
   template <typename N> // N must inherit FreeListNode or have the same fields (and initialization
                         // of them)
-                        struct FreeList {
+  struct FreeList {
     FreeList() : freeListHead(nullptr) {}
     FreeList(FreeList &&other) : freeListHead(other.freeListHead.load(std::memory_order_relaxed)) {
       other.freeListHead.store(nullptr, std::memory_order_relaxed);
