@@ -20,7 +20,9 @@ int main() {
           const auto response_time = stats.response_time<std::chrono::milliseconds>();
           const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
           std::cout << "Timer 1 fired! ";
-          std::cout << wait_time << " + " << computation_time << " = " << response_time << "\n";
+          std::cout << "Wait time = " << wait_time << "ms; ";
+          std::cout << "Computation time = " << computation_time << "ms; ";
+          std::cout << "Response time = " << response_time << "ms\n";
         });
         scheduler.schedule(t, 4); // lowest priority
 
@@ -43,7 +45,9 @@ int main() {
           const auto response_time = stats.response_time<std::chrono::milliseconds>();
           const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
           std::cout << "Timer 2 fired! ";
-          std::cout << wait_time << " + " << computation_time << " = " << response_time << "\n";
+          std::cout << "Wait time = " << wait_time << "ms; ";
+          std::cout << "Computation time = " << computation_time << "ms; ";
+          std::cout << "Response time = " << response_time << "ms\n";
         });
         scheduler.schedule(t, 3); // low priority
 
@@ -66,7 +70,9 @@ int main() {
           const auto response_time = stats.response_time<std::chrono::milliseconds>();
           const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
           std::cout << "Timer 3 fired! ";
-          std::cout << wait_time << " + " << computation_time << " = " << response_time << "\n";
+          std::cout << "Wait time = " << wait_time << "ms; ";
+          std::cout << "Computation time = " << computation_time << "ms; ";
+          std::cout << "Response time = " << response_time << "ms\n";
         });
         scheduler.schedule(t, 2); // medium priority
 
@@ -89,7 +95,9 @@ int main() {
           const auto response_time = stats.response_time<std::chrono::milliseconds>();
           const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
           std::cout << "Timer 4 fired! ";
-          std::cout << wait_time << " + " << computation_time << " = " << response_time << "\n";
+          std::cout << "Wait time = " << wait_time << "ms; ";
+          std::cout << "Computation time = " << computation_time << "ms; ";
+          std::cout << "Response time = " << response_time << "ms\n";
         });
         scheduler.schedule(t, 1); // high priority
 
@@ -112,7 +120,9 @@ int main() {
           const auto response_time = stats.response_time<std::chrono::milliseconds>();
           const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
           std::cout << "Timer 5 fired! ";
-          std::cout << wait_time << " + " << computation_time << " = " << response_time << "\n";
+          std::cout << "Wait time = " << wait_time << "ms; ";
+          std::cout << "Computation time = " << computation_time << "ms; ";
+          std::cout << "Response time = " << response_time << "ms\n";
         });
         scheduler.schedule(t, 0); // highest priority
 
