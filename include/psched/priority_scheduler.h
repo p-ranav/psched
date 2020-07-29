@@ -20,15 +20,18 @@ template <class threads, class priority_levels> class PriorityScheduler {
   std::atomic_bool running_{false};
   std::mutex mutex_;
   std::condition_variable ready_;
+  std::atomic_bool enqueued_{false};
 
   void run() {
-    bool first_task = true;
     while (running_) {
-      if (first_task) {
+
+      // Wait for the `enqueued` signal
+      {
         std::unique_lock<std::mutex> lock{mutex_};
-        ready_.wait(lock);
-        first_task = false;
+        ready_.wait(lock, [this] { return enqueued_.load(); });
+        enqueued_ = false;
       }
+
       Task task;
       bool dequeued = false;
 
@@ -45,10 +48,6 @@ template <class threads, class priority_levels> class PriorityScheduler {
 
       // execute task
       task();
-
-      // Wait for the `enqueued` signal
-      std::unique_lock<std::mutex> lock{mutex_};
-      ready_.wait(lock);
     }
   }
 
@@ -65,12 +64,20 @@ public:
                                " is out of range. Priority should be in range [0, " +
                                std::to_string(priority_levels::value - 1) + "]");
     }
+
+    // Enqueue task
     while (running_) {
       if (priority_queues_[priority].try_push(task)) {
         break;
       }
     }
-    ready_.notify_one();
+
+    // Send `enqueued` signal to worker threads
+    {
+      std::unique_lock<std::mutex> lock{mutex_};
+      enqueued_ = true;
+      ready_.notify_one();
+    }
   }
 
   void start() {
