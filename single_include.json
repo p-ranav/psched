@@ -1,5 +1,5 @@
 {
-    "project": "Priority Scheduling for Modern C++",
+    "project": "Priority-based Task Scheduling for Modern C++",
     "target": "single_include/psched/psched.h",
     "sources": [
         "include/psched/concurrent_queue.h",
