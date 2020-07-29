@@ -2,6 +2,19 @@
 
 `psched` is a lightweight library that provides a priority-based task scheduler for modern C++.
 
+## Getting Started
+
+To get started, create a `PriorityScheduler`
+
+```cpp
+#include <psched/priority_scheduler.h>
+using namespace psched;
+
+int main() {
+  PriorityScheduler<<threads<4>, priority_levels<5>> scheduler;
+}
+```
+
 <p align="center">
   <img height="400" src="img/priority_scheduling.png"/>  
 </p>
