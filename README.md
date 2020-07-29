@@ -31,25 +31,68 @@ To schedule a task, create a `psched::Task`:
 
 ```cpp
 Task t;
-t.set_priority(4); // lowest priority
 
 t.on_execute([] {
-    // execution time of task = 40ms
-    std::this_thread::sleep_for(std::chrono::milliseconds(40));
+  // do work
+  std::this_thread::sleep_for(std::chrono::milliseconds(40));
 });
 
 t.on_complete([] (TaskStats stats) {
-    const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
-    const auto response_time = stats.response_time<std::chrono::milliseconds>();
-    const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
+  // task completed, print stats
+  
+  const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
+  const auto response_time = stats.response_time<std::chrono::milliseconds>();
+  const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
     
-    std::cout << "Executed task [" << stats.task_id << "] Priority = " << stats.task_priority
+  std::cout << "Executed task [" << stats.task_id << "] Priority = " << stats.task_priority
             << ", Response time = " << response_time 
             << " milliseconds, Computation time = " 
             << computation_time << " milliseconds\n";
 });
 
-scheduler.schedule(t);
+scheduler.schedule(t, 4); // schedule task at priority level 4
+```
+
+## Simple Periodic Task
+
+```cpp
+#include <psched/priority_scheduler.h>
+using namespace psched;
+
+int main() {
+  PriorityScheduler<threads<4>, priority_levels<5>> scheduler;
+  scheduler.start();
+
+  // Periodic Timer 1 - 100ms period
+  auto timer1 = std::thread([&scheduler]() {
+    while (true) {
+    
+      // Generate task
+      Task t;
+      t.on_execute([] {
+        // execution time of task = 40ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(40));
+      });
+      
+      t.on_complete([](TaskStats stats) {
+        const auto computation_time = stats.computation_time<std::chrono::milliseconds>();
+        const auto response_time = stats.response_time<std::chrono::milliseconds>();
+        const auto wait_time = stats.wait_time<std::chrono::milliseconds>();
+        std::cout << "Timer 1 fired! ";
+        std::cout << "Wait time = " << wait_time << "ms; ";
+        std::cout << "Computation time = " << computation_time << "ms; ";
+        std::cout << "Response time = " << response_time << "ms\n";
+      });
+      
+      scheduler.schedule(t, 3); // schedule task at priority level 3
+
+      // Sleep for 100ms
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+  });
+  
+  timer1.join();
+}
 ```
 
 ## Generating Single Header
