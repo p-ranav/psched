@@ -45,9 +45,9 @@ Hello World
 
 ### Single Periodic Task
   
-| Task | Period (ms) | Burst Time (ms) | Priority |
-|------|-------------|-----------------|----------|
-| a    | 100         | 40              | 2        |
+| Task | Period (ms) | Burst Time (ms) | Priority   |
+|------|-------------|-----------------|------------|
+| a    | 100         | 40              | 0 (Lowest) |
 
 ```cpp
 #include <iostream>
@@ -57,7 +57,7 @@ using namespace psched;
 int main() {
 
   // Initialize scheduler
-  PriorityScheduler<threads<2>, priority_levels<3>> scheduler;
+  PriorityScheduler<threads<2>, priority_levels<1>> scheduler;
 
   // Configure task
   Task task;
@@ -75,7 +75,7 @@ int main() {
   });
 
   // Schedule periodic task
-  scheduler.schedule<priority<2>, 
+  scheduler.schedule<priority<0>, 
                      period<std::chrono::milliseconds, 100>>(task);
 }
 ```
