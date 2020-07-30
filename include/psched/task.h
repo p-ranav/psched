@@ -16,10 +16,10 @@ protected:
   void save_arrival_time() { stats_.arrival_time = std::chrono::steady_clock::now(); }
 
 public:
-  Task(const std::function<void()> &task_on_execute = {}, 
+  Task(const std::function<void()> &task_on_execute = {},
        const std::function<void(const TaskStats &)> &task_on_complete = {},
-       const std::function<void(const TaskStats &, const char *)> &task_on_error = {}) 
-    : functions_(task_on_execute, task_on_complete, task_on_error) {}
+       const std::function<void(const TaskStats &, const char *)> &task_on_error = {})
+      : functions_(task_on_execute, task_on_complete, task_on_error) {}
 
   Task(const Task &other) {
     functions_ = other.functions_;
@@ -32,13 +32,9 @@ public:
     return *this;
   }
 
-  void on_execute(const std::function<void()> &fn) {
-    functions_.task_main = fn;
-  }
+  void on_execute(const std::function<void()> &fn) { functions_.task_main = fn; }
 
-  void on_complete(const std::function<void(const TaskStats &)> &fn) {
-    functions_.task_end = fn;
-  }
+  void on_complete(const std::function<void(const TaskStats &)> &fn) { functions_.task_end = fn; }
 
   void on_error(const std::function<void(const TaskStats &, const char *)> &fn) {
     functions_.task_error = fn;

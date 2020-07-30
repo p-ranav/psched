@@ -19,12 +19,10 @@ struct TaskFunctions {
   // Called if `task_main()` throws an exception
   std::function<void(const TaskStats &, const char *)> task_error;
 
-  TaskFunctions(const std::function<void()> &task_on_execute = {}, 
+  TaskFunctions(const std::function<void()> &task_on_execute = {},
                 const std::function<void(const TaskStats &)> &task_on_complete = {},
                 const std::function<void(const TaskStats &, const char *)> &task_on_error = {})
-    : task_main(task_on_execute),
-      task_end(task_on_complete),
-      task_error(task_on_error) {}
+      : task_main(task_on_execute), task_end(task_on_complete), task_error(task_on_error) {}
 };
 
 } // namespace psched
