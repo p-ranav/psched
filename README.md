@@ -67,13 +67,13 @@ int main() {
   scheduler.start();
 
   // Configure task
-  Task a;
-  a.on_execute([] {
+  Task t;
+  t.on_execute([] {
     // execution time (burst time) of task = 40ms
     std::this_thread::sleep_for(std::chrono::milliseconds(40));
   });
 
-  a.on_complete([](TaskStats stats) {
+  t.on_complete([](const TaskStats& stats) {
     std::cout << "Timer 1 fired! ";
     std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
     std::cout << "Burst time = " << stats.burst_time() << "ms; ";
@@ -81,10 +81,10 @@ int main() {
   });
 
   // Schedule task periodically
-  auto timer1 = std::thread([&scheduler, &a]() {
+  auto timer1 = std::thread([&scheduler, &t]() {
     do {
       // schedule task at priority level 2
-      scheduler.schedule(a, 2);
+      scheduler.schedule(t, 2);
 
       // sleep for 100ms
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
