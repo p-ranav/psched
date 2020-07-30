@@ -2,7 +2,6 @@
     "project": "Priority-based Task Scheduling for Modern C++",
     "target": "single_include/psched/psched.h",
     "sources": [
-        "include/psched/concurrent_queue.h",
         "include/psched/task_functions.h",
         "include/psched/task_stats.h",
         "include/psched/task.h",

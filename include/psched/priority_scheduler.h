@@ -7,6 +7,7 @@
 #include <psched/task.h>
 #include <psched/task_queue.h>
 #include <thread>
+#include <vector>
 
 namespace psched {
 
@@ -56,6 +57,8 @@ template <class threads, class priority_levels> class PriorityScheduler {
 
 public:
   ~PriorityScheduler() {
+    for (auto &q: priority_queues_)
+      q.done();
     for (auto &t : threads_)
       if (t.joinable())
         t.join();
@@ -67,6 +70,9 @@ public:
                                " is out of range. Priority should be in range [0, " +
                                std::to_string(priority_levels::value - 1) + "]");
     }
+
+    // Save task arrival time
+    task.save_arrival_time();
 
     // Enqueue task
     while (running_) {
@@ -93,6 +99,8 @@ public:
   void stop() {
     running_ = false;
     ready_.notify_all();
+    for (auto &q: priority_queues_)
+      q.done();
     for (auto &t : threads_)
       if (t.joinable())
         t.join();

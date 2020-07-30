@@ -3,7 +3,6 @@
 #include <atomic>
 #include <functional>
 #include <psched/task_functions.h>
-#include <psched/task_stats.h>
 
 namespace psched {
 
@@ -12,7 +11,8 @@ class Task {
   TaskStats stats_;
   std::atomic_bool done_{false};
 
-  friend class TaskQueue;
+  template <class threads, class priority_levels>
+  friend class PriorityScheduler;
 
 protected:
   void save_arrival_time() { stats_.arrival_time = std::chrono::steady_clock::now(); }

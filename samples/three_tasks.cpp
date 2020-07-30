@@ -1,4 +1,5 @@
 #include <psched/priority_scheduler.h>
+#include <iostream>
 using namespace psched;
 
 /*
