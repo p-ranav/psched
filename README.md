@@ -27,6 +27,8 @@ using namespace psched;
 int main() {
   // Initialize the scheduler
   PriorityScheduler<threads<1>, priority_levels<1>> scheduler;
+  
+  // Start the worker threads
   scheduler.start();
 
   // Configure a task
