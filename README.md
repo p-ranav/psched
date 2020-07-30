@@ -49,64 +49,79 @@ Hello World
 
 ## Single Periodic Task
 
-* The following scheduler uses 4 worker threads and 5 queues (for the 5 priority levels). 
-  - 0 = Highest Priority, 4 = Lowest Priority
+* The following scheduler uses 4 worker threads and 3 queues (for the 3 priority levels). 
+  - 0 = Highest Priority, 2 = Lowest Priority
 
 ```cpp
+#include <iostream>
 #include <psched/priority_scheduler.h>
 using namespace psched;
 
 int main() {
-  
+
   // Initialize scheduler
-  PriorityScheduler<threads<8>, priority_levels<5>> scheduler;
+  PriorityScheduler<threads<2>, priority_levels<3>> scheduler;
+
+  // Start the worker threads
   scheduler.start();
 
   // Configure task
   Task t;
   t.on_execute([] {
-    // execution time of task = 40ms
+    // execution time (burst time) of task = 40ms
     std::this_thread::sleep_for(std::chrono::milliseconds(40));
   });
 
   t.on_complete([](TaskStats stats) {
     std::cout << "Timer 1 fired! ";
-    std::cout << "Wait time = " << stats.wait_time() << "ms; ";
-    std::cout << "Computation time = " << stats.computation_time() << "ms; ";
-    std::cout << "Response time = " << stats.response_time() << "ms\n";
+    std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
+    std::cout << "Burst time = " << stats.burst_time() << "ms; ";
+    std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
   });
 
   // Schedule task periodically
   auto timer1 = std::thread([&scheduler, &t]() {
     do {
-      // schedule task at priority level 3
-      scheduler.schedule(t, 3);
+      // schedule task at priority level 2
+      scheduler.schedule(t, 2);
 
       // sleep for 100ms
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    } while(true);
+    } while (true);
   });
 
   timer1.join();
 }
 ```
 
-* ***Wait time***: Duration of time for which the task is waiting in the queue.
-* ***Computation time***: Duration of time taken for the task to execute once it's dequeued by a worker thread.
-* ***Response time***: Duration of time taken to complete the task, once the task is marked as "ready". 
-  - `response_time = wait_time + computation_time`
+Note the use of `task.on_complete`. When a task is complete, it's `on_complete` function (if one is provided) will be called.
+
+```cpp
+t.on_complete([](TaskStats stats) {
+  std::cout << "Timer 1 fired! ";
+  std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
+  std::cout << "Burst time = " << stats.burst_time() << "ms; ";
+  std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
+});
+```
+
+`TaskStats` can be used to study the temporal behavior of the task. This includes:
+* ***Waiting time***: Duration of time for which the task is waiting in the queue.
+* ***Burst time***: Duration of time taken for the task to execute once it's dequeued by a worker thread.
+* ***Turnaround time***: Duration of time taken to complete the task, once the task is marked as "ready". 
+  - `turnaround_time = waiting_time + burst_time`
 
 ```bash
 ▶ ./single_periodic_task
-Timer 1 fired! Wait time = 0ms; Computation time = 42ms; Response time = 42ms
-Timer 1 fired! Wait time = 0ms; Computation time = 42ms; Response time = 42ms
-Timer 1 fired! Wait time = 0ms; Computation time = 44ms; Response time = 44ms
-Timer 1 fired! Wait time = 0ms; Computation time = 43ms; Response time = 44ms
-Timer 1 fired! Wait time = 0ms; Computation time = 43ms; Response time = 43ms
-Timer 1 fired! Wait time = 0ms; Computation time = 43ms; Response time = 43ms
-Timer 1 fired! Wait time = 0ms; Computation time = 40ms; Response time = 40ms
-Timer 1 fired! Wait time = 0ms; Computation time = 43ms; Response time = 43ms
-Timer 1 fired! Wait time = 0ms; Computation time = 40ms; Response time = 40ms
+Timer 1 fired! Waiting time = 0ms; Burst time = 42ms; Turnaround time = 42ms
+Timer 1 fired! Waiting time = 0ms; Burst time = 40ms; Turnaround time = 40ms
+Timer 1 fired! Waiting time = 0ms; Burst time = 44ms; Turnaround time = 44ms
+Timer 1 fired! Waiting time = 0ms; Burst time = 40ms; Turnaround time = 40ms
+Timer 1 fired! Waiting time = 0ms; Burst time = 41ms; Turnaround time = 41ms
+Timer 1 fired! Waiting time = 0ms; Burst time = 43ms; Turnaround time = 43ms
+Timer 1 fired! Waiting time = 0ms; Burst time = 40ms; Turnaround time = 40ms
+Timer 1 fired! Waiting time = 0ms; Burst time = 43ms; Turnaround time = 43ms
+Timer 1 fired! Waiting time = 0ms; Burst time = 44ms; Turnaround time = 44ms
 ```
 
 ## Multiple Periodic Tasks
