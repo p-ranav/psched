@@ -48,9 +48,6 @@ Hello World
 ```
 
 ## Single Periodic Task
-
-* The following scheduler uses 4 worker threads and 3 queues (for the 3 priority levels). 
-  - 0 = Highest Priority, 2 = Lowest Priority
   
 | Task | Period (ms) | Burst Time (ms) | Priority |
 |------|-------------|-----------------|----------|
