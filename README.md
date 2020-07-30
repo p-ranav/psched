@@ -215,8 +215,8 @@ int main() {
 [Task b] Waiting time = 0ms; Burst time = 393ms; Turnaround time = 393ms
 [Task c] Waiting time = 0ms; Burst time = 563ms; Turnaround time = 563ms
 [Task a] Waiting time = 255ms; Burst time = 132ms; Turnaround time = 387ms
-[Task b] Waiting time = [Task a] Waiting time = 0ms; Burst time = 393ms; Turnaround time = 393ms
-254ms; Burst time = 133ms; Turnaround time = 387ms
+[Task b] Waiting time = 254ms; Burst time = 133ms; Turnaround time = 387ms
+[Task a] Waiting time = 0ms; Burst time = 393ms; Turnaround time = 393ms
 [Task a] Waiting time = 252ms; Burst time = 130ms; Turnaround time = 382ms
 [Task b] Waiting time = 0ms; Burst time = 392ms; Turnaround time = 392ms
 [Task a] Waiting time = 250ms; Burst time = 130ms; Turnaround time = 380ms
