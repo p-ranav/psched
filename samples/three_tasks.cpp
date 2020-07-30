@@ -68,6 +68,8 @@ int main() {
         c.join();
     }
 
+    // Tasks are done executing
+    // Calculate average stats for completed tasks
 
     auto get_average_stats = [](const std::vector<TaskStats>& stats) -> std::tuple<long long, long long, long long> {
       if (stats.empty()) {
@@ -82,13 +84,17 @@ int main() {
       return {waiting_time_sum / stats.size(), burst_time_sum / stats.size(), turnaround_time_sum / stats.size()};
     };
 
-    auto a_avg_stats = get_average_stats(a_stats);
-    auto b_avg_stats = get_average_stats(b_stats);
-    auto c_avg_stats = get_average_stats(c_stats);
+    auto print_stats_tuple = [](const std::string & task_id, const std::tuple<long long, long long, long long> stats_avg) {
+      std::cout << task_id << "; " 
+                << std::get<0>(stats_avg) << "ms; "
+                << std::get<1>(stats_avg) << "ms; "
+                << std::get<2>(stats_avg) << "ms\n";
+    };
 
-    std::cout << "a " <<  std::get<0>(a_avg_stats) << " " << std::get<1>(a_avg_stats) << " " << std::get<2>(a_avg_stats) << "\n";
-    std::cout << "b " << std::get<0>(b_avg_stats) << " " << std::get<1>(b_avg_stats) << " " << std::get<2>(b_avg_stats) << "\n";
-    std::cout << "c " << std::get<0>(c_avg_stats) << " " << std::get<1>(c_avg_stats) << " " << std::get<2>(c_avg_stats) << "\n";
+    std::cout << "task_id; waiting_time; burst_time; turnaround_time\n";
+    print_stats_tuple("a", get_average_stats(a_stats));
+    print_stats_tuple("b", get_average_stats(b_stats));
+    print_stats_tuple("c", get_average_stats(c_stats));
 
     scheduler.stop();
 }
