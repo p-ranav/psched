@@ -78,7 +78,7 @@ Note the use of `task.on_complete`. When a task is complete, it's `on_complete` 
   - `turnaround_time = waiting_time + burst_time`
 
 ```bash
-▶ ./single_periodic_task
+./single_periodic_task
 Timer 1 fired! Waiting time = 0ms; Burst time = 42ms; Turnaround time = 42ms
 Timer 1 fired! Waiting time = 0ms; Burst time = 40ms; Turnaround time = 40ms
 Timer 1 fired! Waiting time = 0ms; Burst time = 44ms; Turnaround time = 44ms
@@ -149,7 +149,7 @@ int main() {
 * Note that Task `a`, which is the lowest priority task, waits in the queue for longer than Tasks `b` and `c`.
 
 ```bash
-▶ ./multiple_periodic_tasks
+./multiple_periodic_tasks
 [Task a] Waiting time = 0ms; Burst time = 131ms; Turnaround time = 131ms
 [Task a] Waiting time = 0ms; Burst time = 131ms; Turnaround time = 131ms
 [Task a] Waiting time = 0ms; Burst time = 135ms; Turnaround time = 135ms
@@ -174,6 +174,38 @@ int main() {
 [Task a] Waiting time = 250ms; Burst time = 133ms; Turnaround time = 383ms
 [Task b] Waiting time = 0ms; Burst time = 392ms; Turnaround time = 392ms
 [Task a] Waiting time = 252ms; Burst time = 131ms; Turnaround time = 383ms
+```
+
+### Catching Exceptions
+
+```cpp
+#include <iostream>
+#include <psched/priority_scheduler.h>
+using namespace psched;
+
+int main() {
+
+  PriorityScheduler<threads<1>, priority_levels<1>> scheduler;
+
+  Task fail(
+      // Task action
+      [] { throw std::runtime_error("Task Error: Uh oh, something bad happened"); },
+
+      // Task post-completion callback
+      {},
+
+      // Task error callback
+      [](const TaskStats &stats, const char *error_message) {
+        std::cout << error_message << "\n";
+      });
+
+  scheduler.schedule<priority<0>>(fail);
+}
+```
+
+```bash
+./task_error
+Task Error: Uh oh, something bad happened
 ```
 
 ## Generating Single Header
