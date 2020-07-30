@@ -114,79 +114,53 @@ using namespace psched;
 
 int main() {
   PriorityScheduler<threads<2>, priority_levels<3>> scheduler;
-  scheduler.start();
 
-  {
-    // Periodic Timer 1 - 250ms period
-    auto timer1 = std::thread([&scheduler]() {
-      while (true) {
-        // Sleep for 50ms
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+  Task a(
+    // Task action
+    [] {
+      std::this_thread::sleep_for(std::chrono::milliseconds(130));
+    },
+    // Task post-completion callback
+    [](const TaskStats& stats) {
+      std::cout << "[Task a] ";
+      std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
+      std::cout << "Burst time = " << stats.burst_time() << "ms; ";
+      std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
+    }
+  );
 
-        // Generate task
-        Task a;
-        a.on_execute([] {
-          // execution time of task = 130ms
-          std::this_thread::sleep_for(std::chrono::milliseconds(130));
-        });
-        a.on_complete([](const TaskStats& stats) {
-          std::cout << "[Task a] ";
-          std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
-          std::cout << "Burst time = " << stats.burst_time() << "ms; ";
-          std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
-        });
-        scheduler.schedule(a, 0); // lowest priority
-      }
-    });
+  Task b(
+    // Task action
+    [] {
+      std::this_thread::sleep_for(std::chrono::milliseconds(390));
+    },
+    // Task post-completion callback
+    [](const TaskStats& stats) {
+      std::cout << "[Task b] ";
+      std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
+      std::cout << "Burst time = " << stats.burst_time() << "ms; ";
+      std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
+    }
+  );
 
-    // Periodic Timer 2 - 500ms period
-    auto timer2 = std::thread([&scheduler]() {
-      while (true) {
-        // Sleep for 50ms
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  Task c(
+    // Task action
+    [] {
+      std::this_thread::sleep_for(std::chrono::milliseconds(560));
+    },
+    // Task post-completion callback
+    [](const TaskStats& stats) {
+      std::cout << "[Task c] ";
+      std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
+      std::cout << "Burst time = " << stats.burst_time() << "ms; ";
+      std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
+    }
+  );
 
-        // Generate task
-        Task b;
-        b.on_execute([] {
-          // execution time of task = 390ms
-          std::this_thread::sleep_for(std::chrono::milliseconds(390));
-        });
-        b.on_complete([](const TaskStats& stats) {
-          std::cout << "[Task b] ";
-          std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
-          std::cout << "Burst time = " << stats.burst_time() << "ms; ";
-          std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
-        });
-        scheduler.schedule(b, 1); // medium priority
-      }
-    });
-
-    // Periodic Timer 3 - 1s period
-    auto timer3 = std::thread([&scheduler]() {
-      while (true) {
-        // Sleep for 50ms
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-        // Generate task
-        Task c;
-        c.on_execute([] {
-          // execution time of task = 560ms
-          std::this_thread::sleep_for(std::chrono::milliseconds(560));
-        });
-        c.on_complete([](const TaskStats& stats) {
-          std::cout << "[Task c] ";
-          std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
-          std::cout << "Burst time = " << stats.burst_time() << "ms; ";
-          std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
-        });
-        scheduler.schedule(c, 2); // highest priority
-      }
-    });
-
-    timer1.join();
-    timer2.join();
-    timer3.join();
-  }
+  // Schedule the tasks
+  scheduler.schedule<priority<0>, period<std::chrono::milliseconds, 250>>(a);
+  scheduler.schedule<priority<1>, period<std::chrono::milliseconds, 500>>(b);
+  scheduler.schedule<priority<2>, period<std::chrono::milliseconds, 1000>>(c);
 }
 ```
 
