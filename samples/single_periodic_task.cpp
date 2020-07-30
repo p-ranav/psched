@@ -25,7 +25,7 @@ int main() {
   auto timer1 = std::thread([&scheduler, &t]() {
     do {
       // schedule task at priority level 2
-      scheduler.schedule(t, 2);
+      scheduler.schedule<priority<2>>(t);
 
       // sleep for 100ms
       std::this_thread::sleep_for(std::chrono::milliseconds(100));

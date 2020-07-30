@@ -32,7 +32,7 @@ int main() {
           std::cout << "Burst time = " << stats.burst_time() << "ms; ";
           std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
         });
-        scheduler.schedule(a, 0); // lowest priority
+        scheduler.schedule<priority<0>>(a); // lowest priority
       }
     });
 
@@ -54,7 +54,7 @@ int main() {
           std::cout << "Burst time = " << stats.burst_time() << "ms; ";
           std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
         });
-        scheduler.schedule(b, 1); // medium priority
+        scheduler.schedule<priority<1>>(b); // medium priority
       }
     });
 
@@ -76,7 +76,7 @@ int main() {
           std::cout << "Burst time = " << stats.burst_time() << "ms; ";
           std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
         });
-        scheduler.schedule(c, 2); // highest priority
+        scheduler.schedule<priority<2>>(c); // highest priority
       }
     });
 
