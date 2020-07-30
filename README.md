@@ -50,7 +50,6 @@ Hello World
 using namespace psched;
 
 int main() {
-
   // Initialize scheduler
   PriorityScheduler<threads<2>, priority_levels<1>> scheduler;
 
@@ -104,8 +103,10 @@ Timer 1 fired! Waiting time = 0ms; Burst time = 44ms; Turnaround time = 44ms
 using namespace psched;
 
 int main() {
+  // Initialize scheduler
   PriorityScheduler<threads<2>, priority_levels<3>> scheduler;
 
+  // Configure the tasks
   Task a(
       // Task action
       [] { std::this_thread::sleep_for(std::chrono::milliseconds(130)); },
@@ -184,9 +185,10 @@ int main() {
 using namespace psched;
 
 int main() {
-
+  // Initialize the scheduler
   PriorityScheduler<threads<1>, priority_levels<1>> scheduler;
 
+  // Configure the task
   Task fail(
       // Task action
       [] { throw std::runtime_error("Task Error: Uh oh, something bad happened"); },
@@ -199,6 +201,7 @@ int main() {
         std::cout << error_message << "\n";
       });
 
+  // Schedule the task
   scheduler.schedule<priority<0>>(fail);
 }
 ```
