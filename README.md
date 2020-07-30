@@ -39,7 +39,7 @@ int main() {
 * The above task is sporadic and executed once:
 
 ```bash
-$ ./single_sporadic_task
+./single_sporadic_task
 Hello World
 ```
 
