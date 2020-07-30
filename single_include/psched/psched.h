@@ -30,7 +30,7 @@ struct TaskStats {
   // considered as the sum of the time periods spent waiting to get into memory or
   // ready queue, execution on CPU and executing input/output.
   //
-  // wait_time() + computation_time()
+  // waiting_time() + burst_time()
   template <typename T = std::chrono::milliseconds> long long turnaround_time() const {
     return std::chrono::duration_cast<T>(end_time - arrival_time).count();
   }
@@ -49,10 +49,17 @@ struct TaskFunctions {
   //
   // TaskStats argument can be used to get task computation_time
   // and task response_time.
-  std::function<void(TaskStats)> task_end;
+  std::function<void(const TaskStats &)> task_end;
 
   // Called if `task_main()` throws an exception
-  std::function<void(TaskStats, const char *)> task_error;
+  std::function<void(const TaskStats &, const char *)> task_error;
+
+  TaskFunctions(const std::function<void()> &task_on_execute = {}, 
+                const std::function<void(const TaskStats &)> &task_on_complete = {},
+                const std::function<void(const TaskStats &, const char *)> &task_on_error = {})
+    : task_main(task_on_execute),
+      task_end(task_on_complete),
+      task_error(task_on_error) {}
 };
 
 } // namespace psched
@@ -84,7 +91,7 @@ struct TaskStats {
   // considered as the sum of the time periods spent waiting to get into memory or
   // ready queue, execution on CPU and executing input/output.
   //
-  // wait_time() + computation_time()
+  // waiting_time() + burst_time()
   template <typename T = std::chrono::milliseconds> long long turnaround_time() const {
     return std::chrono::duration_cast<T>(end_time - arrival_time).count();
   }
@@ -108,7 +115,10 @@ protected:
   void save_arrival_time() { stats_.arrival_time = std::chrono::steady_clock::now(); }
 
 public:
-  Task() {}
+  Task(const std::function<void()> &task_on_execute = {}, 
+       const std::function<void(const TaskStats &)> &task_on_complete = {},
+       const std::function<void(const TaskStats &, const char *)> &task_on_error = {}) 
+    : functions_(task_on_execute, task_on_complete, task_on_error) {}
 
   Task(const Task &other) {
     functions_ = other.functions_;
@@ -121,16 +131,16 @@ public:
     return *this;
   }
 
-  template <typename Function> void on_execute(Function &&fn) {
-    functions_.task_main = std::forward<Function>(fn);
+  void on_execute(const std::function<void()> &fn) {
+    functions_.task_main = fn;
   }
 
-  template <typename Function> void on_complete(Function &&fn) {
-    functions_.task_end = std::forward<Function>(fn);
+  void on_complete(const std::function<void(const TaskStats &)> &fn) {
+    functions_.task_end = fn;
   }
 
-  template <typename Function> void on_error(Function &&fn) {
-    functions_.task_error = std::forward<Function>(fn);
+  void on_error(const std::function<void(const TaskStats &, const char *)> &fn) {
+    functions_.task_error = fn;
   }
 
   void operator()() {
@@ -220,6 +230,10 @@ template <size_t T> struct threads { constexpr static size_t value = T; };
 
 template <size_t P> struct priority_levels { constexpr static size_t value = P; };
 
+template <size_t P> struct priority { constexpr static size_t value = P; };
+
+template <class D, size_t P> struct period { constexpr static D value = D(P); };
+
 template <class threads, class priority_levels> class PriorityScheduler {
   std::vector<std::thread> threads_;
   std::array<TaskQueue, priority_levels::value> priority_queues_;
@@ -246,7 +260,7 @@ template <class threads, class priority_levels> class PriorityScheduler {
 
       // Start from highest priority queue
       do {
-        for (size_t i = 0; i < priority_levels::value; i++) {
+        for (size_t i = priority_levels::value - 1; i >= 0; i--) {
           // Try to pop an item
           if (priority_queues_[i].try_pop(task)) {
             dequeued = true;
@@ -261,6 +275,13 @@ template <class threads, class priority_levels> class PriorityScheduler {
   }
 
 public:
+  PriorityScheduler() {
+    running_ = true;
+    for (unsigned n = 0; n != threads::value; ++n) {
+      threads_.emplace_back([this] { run(); });
+    }
+  }
+
   ~PriorityScheduler() {
     for (auto &q : priority_queues_)
       q.done();
@@ -269,19 +290,16 @@ public:
         t.join();
   }
 
-  void schedule(Task &task, size_t priority) {
-    if (priority >= priority_levels::value) {
-      throw std::runtime_error("Error: Priority " + std::to_string(priority) +
-                               " is out of range. Priority should be in range [0, " +
-                               std::to_string(priority_levels::value - 1) + "]");
-    }
+  template <class priority>
+  void schedule(Task &task) {
+    static_assert(priority::value <= priority_levels::value, "priority out of range");
 
     // Save task arrival time
     task.save_arrival_time();
 
     // Enqueue task
     while (running_) {
-      if (priority_queues_[priority].try_push(task)) {
+      if (priority_queues_[priority::value].try_push(task)) {
         break;
       }
     }
@@ -294,11 +312,17 @@ public:
     }
   }
 
-  void start() {
-    running_ = true;
-    for (unsigned n = 0; n != threads::value; ++n) {
-      threads_.emplace_back([this] { run(); });
-    }
+  template <class priority, class period>
+  void schedule(Task task) {
+    std::thread([this, &task]() {
+      do {
+        // schedule task at priority level 2
+        schedule<priority>(task);
+
+        // sleep for 100ms
+        std::this_thread::sleep_for(period::value);
+      } while (true);
+    }).detach();
   }
 
   void stop() {
