@@ -12,6 +12,39 @@
   <img height="400" src="img/priority_scheduling.png"/>  
 </p>
 
+## Single Sporadic Task 
+
+The following example:
+* creates a `PriorityScheduler` object with 1 worker thread and 1 priority level.
+* configures a `Task` which, when executed, will print `"Hello World"`.
+* schedules the task for execution.
+
+```cpp
+#include <iostream>
+#include <psched/priority_scheduler.h>
+using namespace psched;
+
+int main() {
+  // Initialize the scheduler
+  PriorityScheduler<threads<1>, priority_levels<1>> scheduler;
+  scheduler.start();
+
+  // Configure a task - This one's sporadic
+  Task t;
+  t.on_execute([] { std::cout << "Hello World\n"; });
+
+  // Schedule the task
+  scheduler.schedule(t, 0);
+}
+```
+
+* The above task is sporadic and executed once:
+
+```bash
+▶ ./single_sporadic_task
+Hello World
+```
+
 ## Single Periodic Task
 
 * The following scheduler uses 4 worker threads and 5 queues (for the 5 priority levels). 
