@@ -14,11 +14,6 @@
 
 ### Single Sporadic Task 
 
-The following example:
-* creates a `PriorityScheduler` object with 1 worker thread and 1 priority level.
-* configures a `Task` which, when executed, will print `"Hello World"`.
-* schedules the task for execution.
-
 ```cpp
 #include <iostream>
 #include <psched/priority_scheduler.h>
