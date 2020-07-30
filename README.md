@@ -32,14 +32,14 @@ int main() {
   Task t([] { std::cout << "Hello World\n"; });
 
   // Schedule the task
-  scheduler.schedule(t, 0);
+  scheduler.schedule<priority<0>>(t);
 }
 ```
 
 * The above task is sporadic and executed once:
 
 ```bash
-▶ ./single_sporadic_task
+$ ./single_sporadic_task
 Hello World
 ```
 
