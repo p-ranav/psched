@@ -26,14 +26,10 @@ using namespace psched;
 
 int main() {
   // Initialize the scheduler
-  PriorityScheduler<threads<1>, priority_levels<1>> scheduler;
-  
-  // Start the worker threads
-  scheduler.start();
+  PriorityScheduler<threads<4>, priority_levels<1>> scheduler;
 
   // Configure a task
-  Task t;
-  t.on_execute([] { std::cout << "Hello World\n"; });
+  Task t([] { std::cout << "Hello World\n"; });
 
   // Schedule the task
   scheduler.schedule(t, 0);
