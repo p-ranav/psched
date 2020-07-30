@@ -2,7 +2,7 @@
 using namespace psched;
 
 int main() {
-  PriorityScheduler<threads<4>, priority_levels<5>> scheduler;
+  PriorityScheduler<threads<5>, priority_levels<5>> scheduler;
   scheduler.start();
 
   {
@@ -19,7 +19,7 @@ int main() {
           std::this_thread::sleep_for(std::chrono::milliseconds(40));
         });
         t.on_complete([](TaskStats stats) {
-          std::cout << "[Lowest ] Priority Log Message ";
+          std::cout << "[Lowest ] ";
           std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
           std::cout << "Burst time = " << stats.burst_time() << "ms; ";
           std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
@@ -41,7 +41,7 @@ int main() {
           std::this_thread::sleep_for(std::chrono::milliseconds(80));
         });
         t.on_complete([](TaskStats stats) {
-          std::cout << "[Low    ] Priority Log Message ";
+          std::cout << "[Low    ] ";
           std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
           std::cout << "Burst time = " << stats.burst_time() << "ms; ";
           std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
@@ -63,7 +63,7 @@ int main() {
           std::this_thread::sleep_for(std::chrono::milliseconds(130));
         });
         t.on_complete([](TaskStats stats) {
-          std::cout << "[Medium ] Priority Log Message ";
+          std::cout << "[Medium ] ";
           std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
           std::cout << "Burst time = " << stats.burst_time() << "ms; ";
           std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
@@ -85,7 +85,7 @@ int main() {
           std::this_thread::sleep_for(std::chrono::milliseconds(390));
         });
         t.on_complete([](TaskStats stats) {
-          std::cout << "[High   ] Priority Log Message ";
+          std::cout << "[High   ] ";
           std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
           std::cout << "Burst time = " << stats.burst_time() << "ms; ";
           std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
@@ -107,7 +107,7 @@ int main() {
           std::this_thread::sleep_for(std::chrono::milliseconds(560));
         });
         t.on_complete([](TaskStats stats) {
-          std::cout << "[Highest] Priority Log Message ";
+          std::cout << "[Highest] ";
           std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
           std::cout << "Burst time = " << stats.burst_time() << "ms; ";
           std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";

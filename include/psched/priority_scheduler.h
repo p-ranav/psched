@@ -24,12 +24,15 @@ template <class threads, class priority_levels> class PriorityScheduler {
 
   void run() {
     while (running_) {
-
       // Wait for the `enqueued` signal
       {
         std::unique_lock<std::mutex> lock{mutex_};
-        ready_.wait(lock, [this] { return enqueued_.load(); });
+        ready_.wait(lock, [this] { return enqueued_.load() || !running_; });
         enqueued_ = false;
+      }
+
+      if (!running_) {
+        break;
       }
 
       Task task;
@@ -44,7 +47,7 @@ template <class threads, class priority_levels> class PriorityScheduler {
             break;
           }
         }
-      } while (!dequeued);
+      } while (!dequeued && running_);
 
       // execute task
       task();
@@ -89,6 +92,7 @@ public:
 
   void stop() {
     running_ = false;
+    ready_.notify_all();
     for (auto &t : threads_)
       if (t.joinable())
         t.join();

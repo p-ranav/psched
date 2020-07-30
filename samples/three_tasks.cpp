@@ -1,0 +1,94 @@
+#include <psched/priority_scheduler.h>
+using namespace psched;
+
+/*
+| Task | Period | Burst Time | Priority |
+|------|--------|------------|----------|
+| a    | 80     | 32         | 1        |
+| b    | 40     |  5         | 2        |
+| c    | 16     |  4         | 3        |
+*/
+
+int main() {
+    // Initialize scheduler
+    PriorityScheduler<threads<2>, priority_levels<3>> scheduler;
+    scheduler.start();
+
+    std::vector<TaskStats> a_stats, b_stats, c_stats;
+
+    // Configure tasks
+    {
+        auto a = std::thread([&scheduler, &a_stats] {
+          for (size_t i = 0; i < 100; i++) {
+            Task t;
+            t.on_execute([] { 
+                std::this_thread::sleep_for(std::chrono::milliseconds(32)); 
+            });
+            t.on_complete([&a_stats](TaskStats stats) {
+              a_stats.push_back(stats);
+            });
+
+            scheduler.schedule(t, 2);
+            std::this_thread::sleep_for(std::chrono::milliseconds(80));
+          }
+        });
+
+        auto b = std::thread([&scheduler, &b_stats] {
+          for (size_t i = 0; i < 100; i++) {
+            Task t;
+            t.on_execute([] { 
+            std::this_thread::sleep_for(std::chrono::milliseconds(5)); 
+            });
+            t.on_complete([&b_stats](TaskStats stats) {
+              b_stats.push_back(stats);
+            });
+
+            scheduler.schedule(t, 1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(40));
+          }
+        });
+
+        auto c = std::thread([&scheduler, &c_stats] {
+          for (size_t i = 0; i < 100; i++) {
+            Task t;
+            t.on_execute([] { 
+                std::this_thread::sleep_for(std::chrono::milliseconds(4)); 
+            });
+            t.on_complete([&c_stats](TaskStats stats) {
+              c_stats.push_back(stats);
+            });
+
+            scheduler.schedule(t, 0);
+            std::this_thread::sleep_for(std::chrono::milliseconds(16));
+          }
+        });
+
+        a.join();
+        b.join();
+        c.join();
+    }
+
+
+    auto get_average_stats = [](const std::vector<TaskStats>& stats) -> std::tuple<long long, long long, long long> {
+      if (stats.empty()) {
+        return {0, 0, 0};
+      }
+      long long waiting_time_sum = 0, burst_time_sum = 0, turnaround_time_sum = 0;
+      for (const auto& stat: stats) {
+        waiting_time_sum += stat.waiting_time();
+        burst_time_sum += stat.burst_time();
+        turnaround_time_sum += stat.turnaround_time();
+      }
+      return {waiting_time_sum / stats.size(), burst_time_sum / stats.size(), turnaround_time_sum / stats.size()};
+    };
+
+    auto a_avg_stats = get_average_stats(a_stats);
+    auto b_avg_stats = get_average_stats(b_stats);
+    auto c_avg_stats = get_average_stats(c_stats);
+
+    std::cout << "a " <<  std::get<0>(a_avg_stats) << " " << std::get<1>(a_avg_stats) << " " << std::get<2>(a_avg_stats) << "\n";
+    std::cout << "b " << std::get<0>(b_avg_stats) << " " << std::get<1>(b_avg_stats) << " " << std::get<2>(b_avg_stats) << "\n";
+    std::cout << "c " << std::get<0>(c_avg_stats) << " " << std::get<1>(c_avg_stats) << " " << std::get<2>(c_avg_stats) << "\n";
+
+    scheduler.stop();
+}
