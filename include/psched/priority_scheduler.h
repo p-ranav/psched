@@ -15,6 +15,8 @@ template <size_t T> struct threads { constexpr static size_t value = T; };
 
 template <size_t P> struct priority_levels { constexpr static size_t value = P; };
 
+template <size_t P> struct priority { constexpr static size_t value = P; };
+
 template <class threads, class priority_levels> class PriorityScheduler {
   std::vector<std::thread> threads_;
   std::array<TaskQueue, priority_levels::value> priority_queues_;
@@ -41,7 +43,7 @@ template <class threads, class priority_levels> class PriorityScheduler {
 
       // Start from highest priority queue
       do {
-        for (size_t i = 0; i < priority_levels::value; i++) {
+        for (size_t i = priority_levels::value - 1; i >= 0; i--) {
           // Try to pop an item
           if (priority_queues_[i].try_pop(task)) {
             dequeued = true;
@@ -56,6 +58,13 @@ template <class threads, class priority_levels> class PriorityScheduler {
   }
 
 public:
+  PriorityScheduler() {
+    running_ = true;
+    for (unsigned n = 0; n != threads::value; ++n) {
+      threads_.emplace_back([this] { run(); });
+    }
+  }
+
   ~PriorityScheduler() {
     for (auto &q : priority_queues_)
       q.done();
@@ -64,19 +73,16 @@ public:
         t.join();
   }
 
-  void schedule(Task &task, size_t priority) {
-    if (priority >= priority_levels::value) {
-      throw std::runtime_error("Error: Priority " + std::to_string(priority) +
-                               " is out of range. Priority should be in range [0, " +
-                               std::to_string(priority_levels::value - 1) + "]");
-    }
+  template <class priority>
+  void schedule(Task &task) {
+    static_assert(priority::value <= priority_levels::value, "priority out of range");
 
     // Save task arrival time
     task.save_arrival_time();
 
     // Enqueue task
     while (running_) {
-      if (priority_queues_[priority].try_push(task)) {
+      if (priority_queues_[priority::value].try_push(task)) {
         break;
       }
     }
@@ -86,13 +92,6 @@ public:
       std::unique_lock<std::mutex> lock{mutex_};
       enqueued_ = true;
       ready_.notify_one();
-    }
-  }
-
-  void start() {
-    running_ = true;
-    for (unsigned n = 0; n != threads::value; ++n) {
-      threads_.emplace_back([this] { run(); });
     }
   }
 

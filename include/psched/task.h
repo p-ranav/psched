@@ -16,7 +16,10 @@ protected:
   void save_arrival_time() { stats_.arrival_time = std::chrono::steady_clock::now(); }
 
 public:
-  Task() {}
+  Task(const std::function<void()> &task_on_execute = {}, 
+       const std::function<void(const TaskStats &)> &task_on_complete = {},
+       const std::function<void(const TaskStats &, const char *)> &task_on_error = {}) 
+    : functions_(task_on_execute, task_on_complete, task_on_error) {}
 
   Task(const Task &other) {
     functions_ = other.functions_;
@@ -29,16 +32,16 @@ public:
     return *this;
   }
 
-  template <typename Function> void on_execute(Function &&fn) {
-    functions_.task_main = std::forward<Function>(fn);
+  void on_execute(const std::function<void()> &fn) {
+    functions_.task_main = fn;
   }
 
-  template <typename Function> void on_complete(Function &&fn) {
-    functions_.task_end = std::forward<Function>(fn);
+  void on_complete(const std::function<void(const TaskStats &)> &fn) {
+    functions_.task_end = fn;
   }
 
-  template <typename Function> void on_error(Function &&fn) {
-    functions_.task_error = std::forward<Function>(fn);
+  void on_error(const std::function<void(const TaskStats &, const char *)> &fn) {
+    functions_.task_error = fn;
   }
 
   void operator()() {

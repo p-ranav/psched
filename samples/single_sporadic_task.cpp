@@ -4,13 +4,11 @@ using namespace psched;
 
 int main() {
   // Initialize the scheduler
-  PriorityScheduler<threads<1>, priority_levels<1>> scheduler;
-  scheduler.start();
+  PriorityScheduler<threads<4>, priority_levels<1>> scheduler;
 
-  // Configure a task - This one's sporadic
-  Task t;
-  t.on_execute([] { std::cout << "Hello World" << std::endl; });
+  // Configure a task
+  Task t([] { std::cout << "Hello World\n"; });
 
-  // Schedule the task at some priority level, e.g., 3
-  scheduler.schedule(t, 0);
+  // Schedule the task
+  scheduler.schedule<priority<0>>(t);
 }
