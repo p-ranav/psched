@@ -94,18 +94,7 @@ int main() {
 }
 ```
 
-Note the use of `task.on_complete`. When a task is complete, it's `on_complete` function (if one is provided) will be called.
-
-```cpp
-t.on_complete([](TaskStats stats) {
-  std::cout << "Timer 1 fired! ";
-  std::cout << "Waiting time = " << stats.waiting_time() << "ms; ";
-  std::cout << "Burst time = " << stats.burst_time() << "ms; ";
-  std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
-});
-```
-
-`TaskStats` can be used to study the temporal behavior of the task. This includes:
+Note the use of `task.on_complete`. When a task is complete, it's `on_complete` function (if one is provided) will be called. `TaskStats` can be used to study the temporal behavior of the task. This includes:
 * ***Waiting time***: Duration of time for which the task is waiting in the queue.
 * ***Burst time***: Duration of time taken for the task to execute once it's dequeued by a worker thread.
 * ***Turnaround time***: Duration of time taken to complete the task, once the task is marked as "ready". 
