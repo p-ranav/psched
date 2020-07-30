@@ -1,5 +1,5 @@
-#include <psched/priority_scheduler.h>
 #include <iostream>
+#include <psched/priority_scheduler.h>
 using namespace psched;
 
 int main() {
@@ -9,9 +9,7 @@ int main() {
 
   // Configure a task - This one's sporadic
   Task t;
-  t.on_execute([] {
-    std::cout << "Hello World" << std::endl;
-  });
+  t.on_execute([] { std::cout << "Hello World" << std::endl; });
 
   // Schedule the task at some priority level, e.g., 3
   scheduler.schedule(t, 3);

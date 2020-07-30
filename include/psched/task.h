@@ -11,8 +11,7 @@ class Task {
   TaskStats stats_;
   std::atomic_bool done_{false};
 
-  template <class threads, class priority_levels>
-  friend class PriorityScheduler;
+  template <class threads, class priority_levels> friend class PriorityScheduler;
 
 protected:
   void save_arrival_time() { stats_.arrival_time = std::chrono::steady_clock::now(); }

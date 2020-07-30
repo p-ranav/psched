@@ -57,7 +57,7 @@ template <class threads, class priority_levels> class PriorityScheduler {
 
 public:
   ~PriorityScheduler() {
-    for (auto &q: priority_queues_)
+    for (auto &q : priority_queues_)
       q.done();
     for (auto &t : threads_)
       if (t.joinable())
@@ -99,7 +99,7 @@ public:
   void stop() {
     running_ = false;
     ready_.notify_all();
-    for (auto &q: priority_queues_)
+    for (auto &q : priority_queues_)
       q.done();
     for (auto &t : threads_)
       if (t.joinable())

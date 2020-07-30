@@ -1,9 +1,9 @@
-#include <psched/priority_scheduler.h>
 #include <iostream>
+#include <psched/priority_scheduler.h>
 using namespace psched;
 
 int main() {
-  
+
   // Initialize scheduler
   PriorityScheduler<threads<8>, priority_levels<5>> scheduler;
   scheduler.start();
@@ -30,7 +30,7 @@ int main() {
 
       // sleep for 100ms
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    } while(true);
+    } while (true);
   });
 
   timer1.join();

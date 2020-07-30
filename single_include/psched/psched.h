@@ -13,7 +13,7 @@ struct TaskStats {
   TimePoint start_time;   // time point when the task is about to execute (dequeued)
   TimePoint end_time;     // time point when the task completes execution
 
-  // Waiting time is the amount of time spent by a task waiting 
+  // Waiting time is the amount of time spent by a task waiting
   // in the ready queue for getting the CPU.
   template <typename T = std::chrono::milliseconds> long long waiting_time() const {
     return std::chrono::duration_cast<T>(start_time - arrival_time).count();
@@ -25,10 +25,9 @@ struct TaskStats {
     return std::chrono::duration_cast<T>(end_time - start_time).count();
   }
 
-
-  // Turnaround time (TAT) is the time interval from the time of submission 
-  // of a task to the time of the completion of the task. It can also be 
-  // considered as the sum of the time periods spent waiting to get into memory or 
+  // Turnaround time (TAT) is the time interval from the time of submission
+  // of a task to the time of the completion of the task. It can also be
+  // considered as the sum of the time periods spent waiting to get into memory or
   // ready queue, execution on CPU and executing input/output.
   //
   // wait_time() + computation_time()
@@ -68,7 +67,7 @@ struct TaskStats {
   TimePoint start_time;   // time point when the task is about to execute (dequeued)
   TimePoint end_time;     // time point when the task completes execution
 
-  // Waiting time is the amount of time spent by a task waiting 
+  // Waiting time is the amount of time spent by a task waiting
   // in the ready queue for getting the CPU.
   template <typename T = std::chrono::milliseconds> long long waiting_time() const {
     return std::chrono::duration_cast<T>(start_time - arrival_time).count();
@@ -80,10 +79,9 @@ struct TaskStats {
     return std::chrono::duration_cast<T>(end_time - start_time).count();
   }
 
-
-  // Turnaround time (TAT) is the time interval from the time of submission 
-  // of a task to the time of the completion of the task. It can also be 
-  // considered as the sum of the time periods spent waiting to get into memory or 
+  // Turnaround time (TAT) is the time interval from the time of submission
+  // of a task to the time of the completion of the task. It can also be
+  // considered as the sum of the time periods spent waiting to get into memory or
   // ready queue, execution on CPU and executing input/output.
   //
   // wait_time() + computation_time()
@@ -105,8 +103,7 @@ class Task {
   TaskStats stats_;
   std::atomic_bool done_{false};
 
-  template <class threads, class priority_levels>
-  friend class PriorityScheduler;
+  template <class threads, class priority_levels> friend class PriorityScheduler;
 
 protected:
   void save_arrival_time() { stats_.arrival_time = std::chrono::steady_clock::now(); }
@@ -164,7 +161,7 @@ public:
   bool is_done() const { return done_; }
 };
 
-} // namespace psched#pragma once
+} // namespace psched
 #include <condition_variable>
 #include <deque>
 #include <functional>
@@ -209,7 +206,7 @@ public:
   }
 };
 
-}
+} // namespace psched
 #pragma once
 #include <array>
 #include <atomic>
@@ -268,7 +265,7 @@ template <class threads, class priority_levels> class PriorityScheduler {
 
 public:
   ~PriorityScheduler() {
-    for (auto &q: priority_queues_)
+    for (auto &q : priority_queues_)
       q.done();
     for (auto &t : threads_)
       if (t.joinable())
@@ -310,7 +307,7 @@ public:
   void stop() {
     running_ = false;
     ready_.notify_all();
-    for (auto &q: priority_queues_)
+    for (auto &q : priority_queues_)
       q.done();
     for (auto &t : threads_)
       if (t.joinable())
