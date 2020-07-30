@@ -13,7 +13,8 @@ using namespace psched;
 int main() {
   PriorityScheduler<threads<2>, priority_levels<3>> scheduler;
 
-  Task a(
+  Task a
+  (
     // Task action
     [] {
       std::this_thread::sleep_for(std::chrono::milliseconds(130));
@@ -27,7 +28,8 @@ int main() {
     }
   );
 
-  Task b(
+  Task b
+  (
     // Task action
     [] {
       std::this_thread::sleep_for(std::chrono::milliseconds(390));
@@ -41,7 +43,8 @@ int main() {
     }
   );
 
-  Task c(
+  Task c
+  (
     // Task action
     [] {
       std::this_thread::sleep_for(std::chrono::milliseconds(560));
