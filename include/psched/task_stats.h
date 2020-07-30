@@ -27,7 +27,7 @@ struct TaskStats {
   // considered as the sum of the time periods spent waiting to get into memory or
   // ready queue, execution on CPU and executing input/output.
   //
-  // wait_time() + computation_time()
+  // waiting_time() + burst_time()
   template <typename T = std::chrono::milliseconds> long long turnaround_time() const {
     return std::chrono::duration_cast<T>(end_time - arrival_time).count();
   }

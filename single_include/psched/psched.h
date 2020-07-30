@@ -101,7 +101,6 @@ namespace psched {
 class Task {
   TaskFunctions functions_;
   TaskStats stats_;
-  std::atomic_bool done_{false};
 
   template <class threads, class priority_levels> friend class PriorityScheduler;
 
@@ -141,7 +140,6 @@ public:
         functions_.task_main();
       }
       stats_.end_time = std::chrono::steady_clock::now();
-      done_ = true;
     } catch (std::exception &e) {
       stats_.end_time = std::chrono::steady_clock::now();
       if (functions_.task_error) {
@@ -157,11 +155,10 @@ public:
       functions_.task_end(stats_);
     }
   }
-
-  bool is_done() const { return done_; }
 };
 
 } // namespace psched
+#pragma once
 #include <condition_variable>
 #include <deque>
 #include <functional>
