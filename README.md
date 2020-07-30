@@ -2,7 +2,7 @@
 
 `psched` is a lightweight library that provides a priority-based task scheduler for modern C++.
 
-* This priority scheduler manages an array of concurrent queues, each queue assigned a priority-level
+* The scheduler manages an array of concurrent queues, each queue assigned a priority-level
 * A task, when scheduled, is enqueued onto one of queues based on the task's priority
 * A pool of threads executes ready tasks, starting with the highest priority
 
