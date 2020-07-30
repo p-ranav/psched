@@ -69,6 +69,8 @@ int main() {
   // Configure task
   Task t;
   t.on_execute([] {
+    // do work
+    
     // execution time (burst time) of task = 40ms
     std::this_thread::sleep_for(std::chrono::milliseconds(40));
   });
