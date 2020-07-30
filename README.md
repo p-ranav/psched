@@ -7,7 +7,7 @@
 * A pool of threads executes ready tasks, starting with the highest priority
 
 <p align="center">
-  <img height="400" src="img/priority_scheduling.png"/>  
+  <img height="300" src="img/priority_scheduling.png"/>  
 </p>
 
 ## Samples
