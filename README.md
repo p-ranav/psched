@@ -2,9 +2,7 @@
 
 `psched` is a lightweight library that provides a priority-based task scheduler for modern C++.
 
-## Getting Started
-
-* The priority scheduler manages an array of concurrent queues, each queue assigned a priority-level
+* This priority scheduler manages an array of concurrent queues, each queue assigned a priority-level
 * A task, when scheduled, is enqueued onto one of queues based on the task's priority
 * A pool of threads executes ready tasks, starting with the highest priority
 
@@ -12,7 +10,9 @@
   <img height="400" src="img/priority_scheduling.png"/>  
 </p>
 
-## Single Sporadic Task 
+## Samples
+
+### Single Sporadic Task 
 
 The following example:
 * creates a `PriorityScheduler` object with 1 worker thread and 1 priority level.
@@ -47,7 +47,7 @@ int main() {
 Hello World
 ```
 
-## Single Periodic Task
+### Single Periodic Task
   
 | Task | Period (ms) | Burst Time (ms) | Priority |
 |------|-------------|-----------------|----------|
@@ -116,7 +116,7 @@ Timer 1 fired! Waiting time = 0ms; Burst time = 43ms; Turnaround time = 43ms
 Timer 1 fired! Waiting time = 0ms; Burst time = 44ms; Turnaround time = 44ms
 ```
 
-## Multiple Periodic Tasks
+### Multiple Periodic Tasks
 
 | Task | Period (ms) | Burst Time (ms) | Priority    |
 |------|-------------|-----------------|-------------|
