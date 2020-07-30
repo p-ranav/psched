@@ -29,7 +29,7 @@ int main() {
   PriorityScheduler<threads<1>, priority_levels<1>> scheduler;
   scheduler.start();
 
-  // Configure a task - This one's sporadic
+  // Configure a task
   Task t;
   t.on_execute([] { std::cout << "Hello World\n"; });
 
