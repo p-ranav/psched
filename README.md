@@ -205,6 +205,8 @@ int main() {
 }
 ```
 
+* Note that Task `a`, which is the lowest priority task, waits in the queue for longer than Tasks `b` and `c`.
+
 ```bash
 ▶ ./multiple_periodic_tasks
 [Task a] Waiting time = 0ms; Burst time = 131ms; Turnaround time = 131ms
