@@ -158,6 +158,16 @@ Running this sample may yield the following output:
 [Task c] Waiting time = 0ms; Burst time = 560ms; Turnaround time = 560ms
 ```
 
+## Building Samples
+
+```bash
+git clone https://github.com/p-ranav/psched
+cd psched
+mkdir build && cd build
+cmake -DPSCHED_SAMPLES=ON ..
+make
+```
+
 ## Generating Single Header
 
 ```bash
