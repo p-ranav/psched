@@ -85,15 +85,17 @@ Note the use of `task.on_complete`. When a task is complete, it's `on_complete` 
 
 ```bash
 ./single_periodic_task
+Timer 1 fired! Waiting time = 0ms; Burst time = 40ms; Turnaround time = 40ms
+Timer 1 fired! Waiting time = 0ms; Burst time = 40ms; Turnaround time = 40ms
 Timer 1 fired! Waiting time = 0ms; Burst time = 42ms; Turnaround time = 42ms
-Timer 1 fired! Waiting time = 0ms; Burst time = 40ms; Turnaround time = 40ms
 Timer 1 fired! Waiting time = 0ms; Burst time = 44ms; Turnaround time = 44ms
-Timer 1 fired! Waiting time = 0ms; Burst time = 40ms; Turnaround time = 40ms
-Timer 1 fired! Waiting time = 0ms; Burst time = 41ms; Turnaround time = 41ms
 Timer 1 fired! Waiting time = 0ms; Burst time = 43ms; Turnaround time = 43ms
-Timer 1 fired! Waiting time = 0ms; Burst time = 40ms; Turnaround time = 40ms
 Timer 1 fired! Waiting time = 0ms; Burst time = 43ms; Turnaround time = 43ms
 Timer 1 fired! Waiting time = 0ms; Burst time = 44ms; Turnaround time = 44ms
+Timer 1 fired! Waiting time = 0ms; Burst time = 40ms; Turnaround time = 40ms
+Timer 1 fired! Waiting time = 0ms; Burst time = 40ms; Turnaround time = 40ms
+Timer 1 fired! Waiting time = 0ms; Burst time = 40ms; Turnaround time = 40ms
+Timer 1 fired! Waiting time = 0ms; Burst time = 45ms; Turnaround time = 45ms
 ```
 
 ### Multiple Periodic Tasks
@@ -108,14 +110,6 @@ Timer 1 fired! Waiting time = 0ms; Burst time = 44ms; Turnaround time = 44ms
 #include <iostream>
 #include <psched/priority_scheduler.h>
 using namespace psched;
-
-/*
-| Task | Period (ms) | Burst Time (ms) | Priority    |
-|------|-------------|-----------------|-------------|
-| a    |  250        | 130             | 0 (Lowest)  |
-| b    |  500        | 390             | 1           |
-| c    | 1000        | 560             | 2 (Highest) |
-*/
 
 int main() {
   PriorityScheduler<threads<2>, priority_levels<3>> scheduler;
