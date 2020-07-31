@@ -1,67 +1,5 @@
 
 #pragma once
-#include <functional>
-// #include <psched/task_stats.h>
-
-#include <chrono>
-
-namespace psched {
-
-struct TaskStats {
-  using TimePoint = std::chrono::steady_clock::time_point;
-  TimePoint arrival_time; // time point when the task is marked as 'ready' (queued)
-  TimePoint start_time;   // time point when the task is about to execute (dequeued)
-  TimePoint end_time;     // time point when the task completes execution
-
-  // Waiting time is the amount of time spent by a task waiting
-  // in the ready queue for getting the CPU.
-  template <typename T = std::chrono::milliseconds> long long waiting_time() const {
-    return std::chrono::duration_cast<T>(start_time - arrival_time).count();
-  }
-
-  // Burst time is the amount of time required by a task for executing on CPU.
-  // It is also called as execution time or running time.
-  template <typename T = std::chrono::milliseconds> long long burst_time() const {
-    return std::chrono::duration_cast<T>(end_time - start_time).count();
-  }
-
-  // Turnaround time (TAT) is the time interval from the time of submission
-  // of a task to the time of the completion of the task. It can also be
-  // considered as the sum of the time periods spent waiting to get into memory or
-  // ready queue, execution on CPU and executing input/output.
-  //
-  // waiting_time() + burst_time()
-  template <typename T = std::chrono::milliseconds> long long turnaround_time() const {
-    return std::chrono::duration_cast<T>(end_time - arrival_time).count();
-  }
-};
-
-} // namespace psched
-
-namespace psched {
-
-struct TaskFunctions {
-  // Called when the task is (finally) executed by an executor thread
-  std::function<void()> task_main;
-
-  // Called after the task has completed executing.
-  // In case of exception, `task_error` is called first
-  //
-  // TaskStats argument can be used to get task computation_time
-  // and task response_time.
-  std::function<void(const TaskStats &)> task_end;
-
-  // Called if `task_main()` throws an exception
-  std::function<void(const TaskStats &, const char *)> task_error;
-
-  TaskFunctions(const std::function<void()> &task_on_execute = {},
-                const std::function<void(const TaskStats &)> &task_on_complete = {},
-                const std::function<void(const TaskStats &, const char *)> &task_on_error = {})
-      : task_main(task_on_execute), task_end(task_on_complete), task_error(task_on_error) {}
-};
-
-} // namespace psched
-#pragma once
 #include <chrono>
 
 namespace psched {
@@ -99,12 +37,24 @@ struct TaskStats {
 #pragma once
 #include <atomic>
 #include <functional>
-// #include <psched/task_functions.h>
+// #include <psched/task_stats.h>
 
 namespace psched {
 
 class Task {
-  TaskFunctions functions_;
+  // Called when the task is (finally) executed by an executor thread
+  std::function<void()> task_main_;
+
+  // Called after the task has completed executing.
+  // In case of exception, `task_error` is called first
+  //
+  // TaskStats argument can be used to get task computation_time
+  // and task response_time.
+  std::function<void(const TaskStats &)> task_end_;
+
+  // Called if `task_main()` throws an exception
+  std::function<void(const TaskStats &, const char *)> task_error_;
+
   TaskStats stats_;
 
   template <class threads, class priority_levels> friend class PriorityScheduler;
@@ -113,50 +63,54 @@ protected:
   void save_arrival_time() { stats_.arrival_time = std::chrono::steady_clock::now(); }
 
 public:
-  Task(const std::function<void()> &task_on_execute = {},
-       const std::function<void(const TaskStats &)> &task_on_complete = {},
-       const std::function<void(const TaskStats &, const char *)> &task_on_error = {})
-      : functions_(task_on_execute, task_on_complete, task_on_error) {}
+  Task(const std::function<void()> &task_main = {},
+       const std::function<void(const TaskStats &)> &task_end = {},
+       const std::function<void(const TaskStats &, const char *)> &task_error = {})
+      : task_main_(task_main), task_end_(task_end), task_error_(task_error) {}
 
   Task(const Task &other) {
-    functions_ = other.functions_;
+    task_main_ = other.task_main_;
+    task_end_ = other.task_end_;
+    task_error_ = other.task_error_;
     stats_ = other.stats_;
   }
 
   Task &operator=(Task other) {
-    std::swap(functions_, other.functions_);
+    std::swap(task_main_, other.task_main_);
+    std::swap(task_end_, other.task_end_);
+    std::swap(task_error_, other.task_error_);
     std::swap(stats_, other.stats_);
     return *this;
   }
 
-  void on_execute(const std::function<void()> &fn) { functions_.task_main = fn; }
+  void on_execute(const std::function<void()> &fn) { task_main_ = fn; }
 
-  void on_complete(const std::function<void(const TaskStats &)> &fn) { functions_.task_end = fn; }
+  void on_complete(const std::function<void(const TaskStats &)> &fn) { task_end_ = fn; }
 
   void on_error(const std::function<void(const TaskStats &, const char *)> &fn) {
-    functions_.task_error = fn;
+    task_error_ = fn;
   }
 
   void operator()() {
     stats_.start_time = std::chrono::steady_clock::now();
     try {
-      if (functions_.task_main) {
-        functions_.task_main();
+      if (task_main_) {
+        task_main_();
       }
       stats_.end_time = std::chrono::steady_clock::now();
     } catch (std::exception &e) {
       stats_.end_time = std::chrono::steady_clock::now();
-      if (functions_.task_error) {
-        functions_.task_error(stats_, e.what());
+      if (task_error_) {
+        task_error_(stats_, e.what());
       }
     } catch (...) {
       stats_.end_time = std::chrono::steady_clock::now();
-      if (functions_.task_error) {
-        functions_.task_error(stats_, "Unknown exception");
+      if (task_error_) {
+        task_error_(stats_, "Unknown exception");
       }
     }
-    if (functions_.task_end) {
-      functions_.task_end(stats_);
+    if (task_end_) {
+      task_end_(stats_);
     }
   }
 };
@@ -305,7 +259,7 @@ public:
     }
   }
 
-  template <class priority, class period> void schedule(Task task) {
+  template <class priority, class period> void schedule(Task& task) {
     std::thread([this, &task]() {
       do {
         // schedule task at priority level 2
@@ -314,8 +268,7 @@ public:
         // sleep for 100ms
         std::this_thread::sleep_for(period::value);
       } while (true);
-    })
-        .detach();
+    }).detach();
   }
 
   void stop() {
