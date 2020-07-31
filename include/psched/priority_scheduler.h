@@ -19,12 +19,12 @@ template <size_t P> struct priority { constexpr static size_t value = P; };
 
 template <size_t P> struct increment_priority { constexpr static size_t value = P; };
 
-template <class D, size_t P> struct task_starvation { 
+template <class D, size_t P> struct task_starvation_after { 
   typedef D type;
   constexpr static D value = D(P); 
 };
 
-template <class threads, class priority_levels, class task_starvation> class PriorityScheduler {
+template <class threads, class priority_levels, class task_starvation_after> class PriorityScheduler {
   std::vector<std::thread> threads_;
   std::array<TaskQueue, priority_levels::value> priority_queues_;
   std::atomic_bool running_{false};
@@ -52,7 +52,7 @@ template <class threads, class priority_levels, class task_starvation> class Pri
       // Start from the lowest priority till (highest_priority - 1)
       for (size_t i = 0; i < priority_levels::value - 1; i++) {
         // Check if the front of the queue has a starving task
-        if (priority_queues_[i].template try_pop_if_starved<task_starvation>(task)) {
+        if (priority_queues_[i].template try_pop_if_starved<task_starvation_after>(task)) {
           // task has been starved, reschedule at a higher priority
           while (running_) {
             if (priority_queues_[i + 1].try_push(task)) {

@@ -13,7 +13,7 @@ using namespace psched;
 int main() {
   PriorityScheduler<threads<3>, 
                     priority_levels<3>, 
-                    task_starvation<std::chrono::milliseconds, 250>> scheduler;
+                    task_starvation_after<std::chrono::milliseconds, 250>> scheduler;
 
   Task a(
       // Task action
