@@ -112,7 +112,9 @@ Timer 1 fired! Waiting time = 0ms; Burst time = 45ms; Turnaround time = 45ms
 using namespace psched;
 
 int main() {
-  PriorityScheduler<threads<2>, priority_levels<3>> scheduler;
+  PriorityScheduler<threads<3>, 
+                    priority_levels<3>, 
+                    task_starvation<std::chrono::milliseconds, 250>> scheduler;
 
   Task a(
       // Task action
@@ -178,30 +180,22 @@ int main() {
 
 ```bash
 ./multiple_periodic_tasks
-[Task a] Waiting time = 0ms; Burst time = 131ms; Turnaround time = 131ms
-[Task a] Waiting time = 0ms; Burst time = 131ms; Turnaround time = 131ms
+[Task a] Waiting time = 0ms; Burst time = 133ms; Turnaround time = 134ms
 [Task a] Waiting time = 0ms; Burst time = 135ms; Turnaround time = 135ms
 [Task b] Waiting time = 0ms; Burst time = 394ms; Turnaround time = 394ms
-[Task a] Waiting time = 253ms; Burst time = 134ms; Turnaround time = 388ms
-[Task b] Waiting time = 0ms; Burst time = 393ms; Turnaround time = 393ms
-[Task c] Waiting time = 0ms; Burst time = 563ms; Turnaround time = 563ms
-[Task a] Waiting time = 255ms; Burst time = 132ms; Turnaround time = 387ms
-[Task b] Waiting time = 254ms; Burst time = 133ms; Turnaround time = 387ms
-[Task a] Waiting time = 0ms; Burst time = 393ms; Turnaround time = 393ms
-[Task a] Waiting time = 252ms; Burst time = 130ms; Turnaround time = 382ms
+[Task c] Waiting time = 0ms; Burst time = 560ms; Turnaround time = 560ms
+[Task a] Waiting time = 0ms; Burst time = 135ms; Turnaround time = 135ms
 [Task b] Waiting time = 0ms; Burst time = 392ms; Turnaround time = 392ms
-[Task a] Waiting time = 250ms; Burst time = 130ms; Turnaround time = 380ms
-[Task c] Waiting time = 0ms; Burst time = 561ms; Turnaround time = 561ms
-[Task a] Waiting time = 251ms; Burst time = 131ms; Turnaround time = 382ms
+[Task a] Waiting time = 0ms; Burst time = 132ms; Turnaround time = 132ms
+[Task a] Waiting time = 0ms; Burst time = 132ms; Turnaround time = 132ms
 [Task b] Waiting time = 0ms; Burst time = 393ms; Turnaround time = 393ms
-[Task a] Waiting time = 250ms; Burst time = 130ms; Turnaround time = 380ms
-[Task a] Waiting time = 255ms; Burst time = 130ms; Turnaround time = 385ms
-[Task b] Waiting time = 0ms; Burst time = 391ms; Turnaround time = 391ms
-[Task a] Waiting time = 250ms; Burst time = 133ms; Turnaround time = 384ms
+[Task a] Waiting time = 0ms; Burst time = 132ms; Turnaround time = 132ms
 [Task c] Waiting time = 0ms; Burst time = 564ms; Turnaround time = 564ms
-[Task a] Waiting time = 250ms; Burst time = 133ms; Turnaround time = 383ms
-[Task b] Waiting time = 0ms; Burst time = 392ms; Turnaround time = 392ms
-[Task a] Waiting time = 252ms; Burst time = 131ms; Turnaround time = 383ms
+[Task a] Waiting time = 0ms; Burst time = 134ms; Turnaround time = 134ms
+[Task b] Waiting time = 0ms; Burst time = 390ms; Turnaround time = 390ms
+[Task a] Waiting time = 0ms; Burst time = 134ms; Turnaround time = 134ms
+[Task a] Waiting time = 0ms; Burst time = 134ms; Turnaround time = 134ms
+[Task b] Waiting time = 0ms; Burst time = 391ms; Turnaround time = 391ms
 ```
 
 ### Catching Exceptions

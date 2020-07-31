@@ -43,6 +43,24 @@ public:
     }
     ready_.notify_all();
   }
+
+  template <class A>
+  bool try_pop_if_starved(Task &task) {
+    std::unique_lock<std::mutex> lock{mutex_, std::try_to_lock};
+    if (!lock || queue_.empty())
+      return false;
+    task = queue_.front();
+    const auto now = std::chrono::steady_clock::now();
+    const auto diff = std::chrono::duration_cast<typename A::type>(now - task.stats_.arrival_time);
+    if (diff > A::value) {
+      // pop the task so it can be enqueued at a higher priority
+      task = std::move(queue_.front());
+      queue_.pop_front();
+      return true;
+    }
+    return false;
+  }
+
 };
 
 } // namespace psched

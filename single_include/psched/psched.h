@@ -158,6 +158,24 @@ public:
     }
     ready_.notify_all();
   }
+
+  template <class A>
+  bool try_pop_if_starved(Task &task) {
+    std::unique_lock<std::mutex> lock{mutex_, std::try_to_lock};
+    if (!lock || queue_.empty())
+      return false;
+    task = queue_.front();
+    const auto now = std::chrono::steady_clock::now();
+    const auto diff = std::chrono::duration_cast<typename A::type>(now - task.stats_.arrival_time);
+    if (diff > A::value) {
+      // pop the task so it can be enqueued at a higher priority
+      task = std::move(queue_.front());
+      queue_.pop_front();
+      return true;
+    }
+    return false;
+  }
+
 };
 
 } // namespace psched
@@ -179,9 +197,14 @@ template <size_t P> struct priority_levels { constexpr static size_t value = P; 
 
 template <size_t P> struct priority { constexpr static size_t value = P; };
 
-template <class D, size_t P> struct period { constexpr static D value = D(P); };
+template <size_t P> struct increment_priority { constexpr static size_t value = P; };
 
-template <class threads, class priority_levels> class PriorityScheduler {
+template <class D, size_t P> struct task_starvation { 
+  typedef D type;
+  constexpr static D value = D(P); 
+};
+
+template <class threads, class priority_levels, class task_starvation> class PriorityScheduler {
   std::vector<std::thread> threads_;
   std::array<TaskQueue, priority_levels::value> priority_queues_;
   std::atomic_bool running_{false};
@@ -203,6 +226,23 @@ template <class threads, class priority_levels> class PriorityScheduler {
       }
 
       Task task;
+
+      // Handle task starvation at lower priorities
+      // Modulate priorities based on age
+      // Start from the lowest priority till (highest_priority - 1)
+      for (size_t i = 0; i < priority_levels::value - 1; i++) {
+        // Check if the front of the queue has a starving task
+        if (priority_queues_[i].template try_pop_if_starved<task_starvation>(task)) {
+          // task has been starved, reschedule at a higher priority
+          while (running_) {
+            if (priority_queues_[i + 1].try_push(task)) {
+              break;
+            }
+          }
+        }
+      }
+
+      // Run the highest priority ready task
       bool dequeued = false;
 
       // Start from highest priority queue
