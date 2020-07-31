@@ -75,11 +75,8 @@ public:
         t.join();
   }
 
-  template <class priority> void schedule(Task &task) {
+  template <class priority> void schedule(Task& task) {
     static_assert(priority::value <= priority_levels::value, "priority out of range");
-
-    // Save task arrival time
-    task.save_arrival_time();
 
     // Enqueue task
     while (running_) {

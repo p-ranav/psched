@@ -57,7 +57,7 @@ class Task {
 
   TaskStats stats_;
 
-  template <class threads, class priority_levels> friend class PriorityScheduler;
+  friend class TaskQueue;
 
 protected:
   void save_arrival_time() { stats_.arrival_time = std::chrono::steady_clock::now(); }
@@ -139,12 +139,13 @@ public:
     return true;
   }
 
-  template <typename F> bool try_push(F &&f) {
+  bool try_push(Task& task) {
     {
       std::unique_lock<std::mutex> lock{mutex_, std::try_to_lock};
       if (!lock)
         return false;
-      queue_.emplace_back(std::forward<F>(f));
+      task.save_arrival_time();
+      queue_.emplace_back(task);
     }
     ready_.notify_one();
     return true;
@@ -236,11 +237,8 @@ public:
         t.join();
   }
 
-  template <class priority> void schedule(Task &task) {
+  template <class priority> void schedule(Task& task) {
     static_assert(priority::value <= priority_levels::value, "priority out of range");
-
-    // Save task arrival time
-    task.save_arrival_time();
 
     // Enqueue task
     while (running_) {

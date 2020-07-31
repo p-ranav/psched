@@ -22,7 +22,7 @@ class Task {
 
   TaskStats stats_;
 
-  template <class threads, class priority_levels> friend class PriorityScheduler;
+  friend class TaskQueue;
 
 protected:
   void save_arrival_time() { stats_.arrival_time = std::chrono::steady_clock::now(); }

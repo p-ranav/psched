@@ -24,12 +24,13 @@ public:
     return true;
   }
 
-  template <typename F> bool try_push(F &&f) {
+  bool try_push(Task& task) {
     {
       std::unique_lock<std::mutex> lock{mutex_, std::try_to_lock};
       if (!lock)
         return false;
-      queue_.emplace_back(std::forward<F>(f));
+      task.save_arrival_time();
+      queue_.emplace_back(task);
     }
     ready_.notify_one();
     return true;
