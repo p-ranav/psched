@@ -41,7 +41,7 @@ int main() {
 * Specify the criteria for ***task starvation*** using `task_starvation<duration>`
   - In priority-based scheduling, Each task is assigned a priority and the task with the highest priority is executed first. A steady flow of CPU bursts from the high priority tasks can starve the low-priority ones. To solve this problem, age-based priority modulation is used. `task_starvation<std::chrono::milliseconds, 250>>` specifies that any task at a lower priority that is starved of the CPU, i.e., waiting in a queue, for more than `250ms` will get a bump in priority.
   
- Create the first task, `Task a` like below. The task "performs work" for 130ms. The post-completion callback can be used to study the temporal behavior of the task, e.g., waiting time, burst time, turnaround time etc.
+ Create the first task, `Task a` like below. The task "performs work" for 130ms. The post-completion callback, called when the task has completed, can be used to study the temporal behavior of the task, e.g., waiting time, burst time, and turnaround time.
  
  ```cpp
  
