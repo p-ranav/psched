@@ -18,7 +18,7 @@ class Task {
   std::function<void(const TaskStats &)> task_end_;
 
   // Called if `task_main()` throws an exception
-  std::function<void(const TaskStats &, const char *)> task_error_;
+  std::function<void(const char *)> task_error_;
 
   TaskStats stats_;
 
@@ -30,7 +30,7 @@ protected:
 public:
   Task(const std::function<void()> &task_main = {},
        const std::function<void(const TaskStats &)> &task_end = {},
-       const std::function<void(const TaskStats &, const char *)> &task_error = {})
+       const std::function<void(const char *)> &task_error = {})
       : task_main_(task_main), task_end_(task_end), task_error_(task_error) {}
 
   Task(const Task &other) {
@@ -52,7 +52,7 @@ public:
 
   void on_complete(const std::function<void(const TaskStats &)> &fn) { task_end_ = fn; }
 
-  void on_error(const std::function<void(const TaskStats &, const char *)> &fn) {
+  void on_error(const std::function<void(const char *)> &fn) {
     task_error_ = fn;
   }
 
@@ -66,12 +66,12 @@ public:
     } catch (std::exception &e) {
       stats_.end_time = std::chrono::steady_clock::now();
       if (task_error_) {
-        task_error_(stats_, e.what());
+        task_error_(e.what());
       }
     } catch (...) {
       stats_.end_time = std::chrono::steady_clock::now();
       if (task_error_) {
-        task_error_(stats_, "Unknown exception");
+        task_error_("Unknown exception");
       }
     }
     if (task_end_) {

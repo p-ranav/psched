@@ -14,7 +14,7 @@ int main() {
       {},
 
       // Task error callback
-      [](const TaskStats &stats, const char *error_message) {
+      [](const char *error_message) {
         std::cout << error_message << "\n";
       });
 

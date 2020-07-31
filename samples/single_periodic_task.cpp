@@ -5,7 +5,7 @@ using namespace psched;
 int main() {
 
   // Initialize scheduler
-  PriorityScheduler<threads<2>, priority_levels<1>> scheduler;
+  PriorityScheduler<threads<4>, priority_levels<1>> scheduler;
 
   // Configure task
   Task task(
@@ -20,5 +20,5 @@ int main() {
       });
 
   // Schedule periodic task
-  scheduler.schedule<priority<0>, period<std::chrono::milliseconds, 100>>(task);
+  scheduler.schedule<priority<0>, period<std::chrono::milliseconds, 10>>(task);
 }
