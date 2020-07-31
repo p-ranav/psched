@@ -19,12 +19,13 @@ template <size_t P> struct priority { constexpr static size_t value = P; };
 
 template <size_t P> struct increment_priority { constexpr static size_t value = P; };
 
-template <class D, size_t P> struct task_starvation_after { 
+template <class D, size_t P> struct task_starvation_after {
   typedef D type;
-  constexpr static D value = D(P); 
+  constexpr static D value = D(P);
 };
 
-template <class threads, class priority_levels, class task_starvation_after> class PriorityScheduler {
+template <class threads, class priority_levels, class task_starvation_after>
+class PriorityScheduler {
   std::vector<std::thread> threads_;
   std::array<TaskQueue, priority_levels::value> priority_queues_;
   std::atomic_bool running_{false};
@@ -97,7 +98,7 @@ public:
         t.join();
   }
 
-  template <class priority> void schedule(Task& task) {
+  template <class priority> void schedule(Task &task) {
     static_assert(priority::value <= priority_levels::value, "priority out of range");
 
     // Enqueue task

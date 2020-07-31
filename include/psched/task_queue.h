@@ -24,7 +24,7 @@ public:
     return true;
   }
 
-  bool try_push(Task& task) {
+  bool try_push(Task &task) {
     {
       std::unique_lock<std::mutex> lock{mutex_, std::try_to_lock};
       if (!lock)
@@ -44,8 +44,7 @@ public:
     ready_.notify_all();
   }
 
-  template <class A>
-  bool try_pop_if_starved(Task &task) {
+  template <class A> bool try_pop_if_starved(Task &task) {
     std::unique_lock<std::mutex> lock{mutex_, std::try_to_lock};
     if (!lock || queue_.empty())
       return false;
@@ -60,7 +59,6 @@ public:
     }
     return false;
   }
-
 };
 
 } // namespace psched
