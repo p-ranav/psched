@@ -2,13 +2,47 @@
 
 `psched` is a lightweight library that provides a priority-based task scheduler for modern C++.
 
-* The scheduler manages an array of concurrent queues, each queue assigned a priority-level
+* The `psched` scheduler manages an array of concurrent queues, each queue assigned a priority-level
 * A task, when scheduled, is enqueued onto one of queues based on the task's priority
 * A pool of threads executes ready tasks, starting with the highest priority
+* The priority of starving tasks is modulated based on the age of the task
 
 <p align="center">
   <img height="400" src="img/priority_scheduling.png"/>  
 </p>
+
+## Getting Started
+
+Consider the task set below. There are three periodic tasks: a, b and c. 
+
+| Task | Period (ms) | Burst Time (ms) | Priority    |
+|------|-------------|-----------------|-------------|
+| a    |  250        | 130             | 0 (Lowest)  |
+| b    |  500        | 390             | 1           |
+| c    | 1000        | 560             | 2 (Highest) |
+
+Here, _burst time_ refers to the amount of time required by the task for executing on CPU.
+
+First, let's create a scheduler:
+
+```cpp
+#include <iostream>
+#include <psched/priority_scheduler.h>
+using namespace psched;
+
+int main() {
+  PriorityScheduler<threads<3>, 
+                    priority_levels<3>, 
+                    task_starvation<std::chrono::milliseconds, 2500>> scheduler;
+```
+
+* We specify the number of worker threads using `threads<size_t>`
+* We specify the number of priority levels, i.e., the number of queues/lanes, using `priority_levels<size_t>`
+* We specify the criteria for task starvation using `task_starvation<duration>`
+
+***NOTE on Task Starvation***:
+
+In priority-based scheduling, Each task is assigned a priority and the process with the highest priority is executed first. A steady flow of CPU bursts from the high priority processes can starve the low-priority ones. To solve this problem, age-based priority modulation can be used. Here, specifying `task_starvation<std::chrono::milliseconds, 2500>>` specifies that any task at a lower priority that is starved of the CPU, i.e., waiting in a queue, for more than `2.5s` will get a bump in priority.
 
 ## Samples
 
