@@ -50,8 +50,9 @@ Hello World
 using namespace psched;
 
 int main() {
+
   // Initialize scheduler
-  PriorityScheduler<threads<2>, priority_levels<1>> scheduler;
+  PriorityScheduler<threads<4>, priority_levels<1>> scheduler;
 
   // Configure task
   Task task(
@@ -66,7 +67,13 @@ int main() {
       });
 
   // Schedule periodic task
-  scheduler.schedule<priority<0>, period<std::chrono::milliseconds, 100>>(task);
+  auto periodic_timer = std::thread([&scheduler, &task]() {
+    while (true) {
+      scheduler.schedule<priority<0>>(task);
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+  });
+  periodic_timer.join();
 }
 ```
 
@@ -102,11 +109,17 @@ Timer 1 fired! Waiting time = 0ms; Burst time = 44ms; Turnaround time = 44ms
 #include <psched/priority_scheduler.h>
 using namespace psched;
 
+/*
+| Task | Period (ms) | Burst Time (ms) | Priority    |
+|------|-------------|-----------------|-------------|
+| a    |  250        | 130             | 0 (Lowest)  |
+| b    |  500        | 390             | 1           |
+| c    | 1000        | 560             | 2 (Highest) |
+*/
+
 int main() {
-  // Initialize scheduler
   PriorityScheduler<threads<2>, priority_levels<3>> scheduler;
 
-  // Configure the tasks
   Task a(
       // Task action
       [] { std::this_thread::sleep_for(std::chrono::milliseconds(130)); },
@@ -117,6 +130,13 @@ int main() {
         std::cout << "Burst time = " << stats.burst_time() << "ms; ";
         std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
       });
+
+  auto timer_a = std::thread([&scheduler, &a]() {
+    while (true) {
+      scheduler.schedule<priority<0>>(a);
+      std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    }
+  });
 
   Task b(
       // Task action
@@ -129,6 +149,13 @@ int main() {
         std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
       });
 
+  auto timer_b = std::thread([&scheduler, &b]() {
+    while (true) {
+      scheduler.schedule<priority<1>>(b);
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+  });
+
   Task c(
       // Task action
       [] { std::this_thread::sleep_for(std::chrono::milliseconds(560)); },
@@ -140,10 +167,16 @@ int main() {
         std::cout << "Turnaround time = " << stats.turnaround_time() << "ms\n";
       });
 
-  // Schedule the tasks
-  scheduler.schedule<priority<0>, period<std::chrono::milliseconds, 250>>(a);
-  scheduler.schedule<priority<1>, period<std::chrono::milliseconds, 500>>(b);
-  scheduler.schedule<priority<2>, period<std::chrono::milliseconds, 1000>>(c);
+  auto timer_c = std::thread([&scheduler, &c]() {
+    while (true) {
+      scheduler.schedule<priority<2>>(c);
+      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+  });
+
+  timer_a.join();
+  timer_b.join();
+  timer_c.join();
 }
 ```
 
