@@ -13,7 +13,7 @@
 
 ## Getting Started
 
-Consider the task set below. There are three periodic tasks: a, b and c. 
+Consider the task set below. There are three periodic tasks: `a`, `b` and `c`. 
 
 | Task | Period (ms) | Burst Time (ms) | Priority    |
 |------|-------------|-----------------|-------------|
@@ -36,13 +36,10 @@ int main() {
                     task_starvation<std::chrono::milliseconds, 2500>> scheduler;
 ```
 
-* We specify the number of worker threads using `threads<size_t>`
-* We specify the number of priority levels, i.e., the number of queues/lanes, using `priority_levels<size_t>`
-* We specify the criteria for task starvation using `task_starvation<duration>`
-
-***NOTE on Task Starvation***:
-
-In priority-based scheduling, Each task is assigned a priority and the process with the highest priority is executed first. A steady flow of CPU bursts from the high priority processes can starve the low-priority ones. To solve this problem, age-based priority modulation can be used. Here, specifying `task_starvation<std::chrono::milliseconds, 2500>>` specifies that any task at a lower priority that is starved of the CPU, i.e., waiting in a queue, for more than `2.5s` will get a bump in priority.
+* Specify the number of worker threads using `threads<size_t>`
+* Specify the number of priority levels, i.e., the number of queues/lanes, using `priority_levels<size_t>`
+* Specify the criteria for task starvation using `task_starvation<duration>`
+  - In priority-based scheduling, Each task is assigned a priority and the process with the highest priority is executed first. A steady flow of CPU bursts from the high priority processes can starve the low-priority ones. To solve this problem, age-based priority modulation is used. Here, specifying `task_starvation<std::chrono::milliseconds, 2500>>` specifies that any task at a lower priority that is starved of the CPU, i.e., waiting in a queue, for more than `2.5s` will get a bump in priority.
 
 ## Samples
 
