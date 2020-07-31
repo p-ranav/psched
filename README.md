@@ -23,6 +23,8 @@ Consider the task set below. There are three periodic tasks: `a`, `b` and `c`.
 
 Here, _burst time_ refers to the amount of time required by the task for executing on CPU.
 
+### Create a `PriorityScheduler`
+
 First, let's create a scheduler:
 
 ```cpp
@@ -42,6 +44,8 @@ int main() {
   - In priority-based scheduling, Each task is assigned a priority and the task with the highest priority is executed first. A steady flow of CPU bursts from the high priority tasks can starve the low-priority ones. To solve this problem, age-based priority modulation is used.    
   - `task_starvation_after<std::chrono::milliseconds, 250>>` specifies that any task at a lower priority that is starved of the CPU, i.e., waiting in a queue, for more than `250ms` will get a bump in priority. This way, low-priority tasks are not blocked indefinitely by higher priority tasks.
   
+### Create a `Task`
+  
  Create the first task, `Task a` like below. The task "performs work" for 130ms. The post-completion callback, called when the task has completed, can be used to study the temporal behavior of the task, e.g., waiting time, burst time, and turnaround time.
  
  ```cpp
@@ -60,6 +64,8 @@ int main() {
   );
  ```
  
+### Schedule the task
+ 
 Now, we can write a simple periodic timer that schedules this task at `priority<0>`:
 
 ```cpp
@@ -74,6 +80,8 @@ Now, we can write a simple periodic timer that schedules this task at `priority<
     }
   });
 ```
+
+### Schedule more tasks
 
 We can repeat the above code for tasks `b` and `c`:
 
