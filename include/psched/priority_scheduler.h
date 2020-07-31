@@ -96,18 +96,6 @@ public:
     }
   }
 
-  template <class priority, class period> void schedule(Task& task) {
-    std::thread([this, &task]() {
-      do {
-        // schedule task at priority level 2
-        schedule<priority>(task);
-
-        // sleep for 100ms
-        std::this_thread::sleep_for(period::value);
-      } while (true);
-    }).detach();
-  }
-
   void stop() {
     running_ = false;
     ready_.notify_all();

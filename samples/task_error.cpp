@@ -14,9 +14,7 @@ int main() {
       {},
 
       // Task error callback
-      [](const char *error_message) {
-        std::cout << error_message << "\n";
-      });
+      [](const char *error_message) { std::cout << error_message << "\n"; });
 
   scheduler.schedule<priority<0>>(fail);
 }

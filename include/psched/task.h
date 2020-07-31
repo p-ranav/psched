@@ -52,9 +52,7 @@ public:
 
   void on_complete(const std::function<void(const TaskStats &)> &fn) { task_end_ = fn; }
 
-  void on_error(const std::function<void(const char *)> &fn) {
-    task_error_ = fn;
-  }
+  void on_error(const std::function<void(const char *)> &fn) { task_error_ = fn; }
 
   void operator()() {
     stats_.start_time = std::chrono::steady_clock::now();

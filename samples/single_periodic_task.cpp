@@ -20,5 +20,11 @@ int main() {
       });
 
   // Schedule periodic task
-  scheduler.schedule<priority<0>, period<std::chrono::milliseconds, 10>>(task);
+  auto periodic_timer = std::thread([&scheduler, &task]() {
+    while (true) {
+      scheduler.schedule<priority<0>>(task);
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+  });
+  periodic_timer.join();
 }

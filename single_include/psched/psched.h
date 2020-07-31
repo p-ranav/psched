@@ -87,9 +87,7 @@ public:
 
   void on_complete(const std::function<void(const TaskStats &)> &fn) { task_end_ = fn; }
 
-  void on_error(const std::function<void(const char *)> &fn) {
-    task_error_ = fn;
-  }
+  void on_error(const std::function<void(const char *)> &fn) { task_error_ = fn; }
 
   void operator()() {
     stats_.start_time = std::chrono::steady_clock::now();
@@ -257,18 +255,6 @@ public:
       enqueued_ = true;
       ready_.notify_one();
     }
-  }
-
-  template <class priority, class period> void schedule(Task& task) {
-    std::thread([this, &task]() {
-      do {
-        // schedule task at priority level 2
-        schedule<priority>(task);
-
-        // sleep for 100ms
-        std::this_thread::sleep_for(period::value);
-      } while (true);
-    }).detach();
   }
 
   void stop() {
