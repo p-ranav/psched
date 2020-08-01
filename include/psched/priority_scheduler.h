@@ -19,7 +19,18 @@ template <size_t P> struct priority { constexpr static size_t value = P; };
 
 template <size_t P> struct increment_priority { constexpr static size_t value = P; };
 
+template <typename T>
+struct is_chrono_duration {
+    static constexpr bool value = false;
+};
+
+template <typename Rep, typename Period>
+struct is_chrono_duration<std::chrono::duration<Rep, Period>> {
+    static constexpr bool value = true;
+};
+
 template <class D, size_t P> struct task_starvation_after {
+  static_assert(is_chrono_duration<D>::value, "Duration must be a std::chrono::duration");
   typedef D type;
   constexpr static D value = D(P);
 };
