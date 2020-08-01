@@ -218,8 +218,6 @@ template <size_t P> struct priority_levels { constexpr static size_t value = P; 
 
 template <size_t P> struct priority { constexpr static size_t value = P; };
 
-template <size_t P> struct increment_priority { constexpr static size_t value = P; };
-
 template <typename T> struct is_chrono_duration { static constexpr bool value = false; };
 
 template <typename Rep, typename Period>
@@ -227,13 +225,22 @@ struct is_chrono_duration<std::chrono::duration<Rep, Period>> {
   static constexpr bool value = true;
 };
 
-template <class D, size_t P> struct task_starvation_after {
+template <class D = std::chrono::milliseconds, size_t P = 0> struct task_starvation_after {
+  constexpr static bool priority_modulation_enabled = (P > 0);
   static_assert(is_chrono_duration<D>::value, "Duration must be a std::chrono::duration");
   typedef D type;
   constexpr static D value = D(P);
 };
 
-template <class threads, class priority_levels, class task_starvation_after,
+template <size_t P> struct increment_priority_by { constexpr static size_t value = P; };
+
+template <class T, class I> struct aging_policy {
+  typedef T task_starvation_after;
+  typedef I increment_priority_by;
+};
+
+template <class threads, class priority_levels,
+          class aging_policy = aging_policy<task_starvation_after<>, increment_priority_by<1>>,
           class maintain_queue_size = maintain_queue_size<>>
 class PriorityScheduler {
   std::vector<std::thread> threads_; // Scheduler thread pool
@@ -259,16 +266,22 @@ class PriorityScheduler {
 
       Task task;
 
-      // Handle task starvation at lower priorities
-      // Modulate priorities based on age
-      // Start from the lowest priority till (highest_priority - 1)
-      for (size_t i = 0; i < priority_levels::value - 1; i++) {
-        // Check if the front of the queue has a starving task
-        if (priority_queues_[i].template try_pop_if_starved<task_starvation_after>(task)) {
-          // task has been starved, reschedule at a higher priority
-          while (running_) {
-            if (priority_queues_[i + 1].try_push(task)) {
-              break;
+      if (aging_policy::task_starvation_after::priority_modulation_enabled) {
+        // Handle task starvation at lower priorities
+        // Modulate priorities based on age
+        // Start from the lowest priority till (highest_priority - 1)
+        for (size_t i = 0; i < priority_levels::value - 1; i++) {
+          // Check if the front of the queue has a starving task
+          if (priority_queues_[i]
+                  .template try_pop_if_starved<typename aging_policy::task_starvation_after>(
+                      task)) {
+            // task has been starved, reschedule at a higher priority
+            while (running_) {
+              const auto new_priority = std::min(i + aging_policy::increment_priority_by::value,
+                                                 priority_levels::value - 1);
+              if (priority_queues_[new_priority].try_push(task)) {
+                break;
+              }
             }
           }
         }

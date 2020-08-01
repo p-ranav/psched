@@ -35,9 +35,11 @@ using namespace psched;
 int main() {
   PriorityScheduler<threads<3>, 
                     priority_levels<3>,
-                    task_starvation_after<std::chrono::milliseconds, 250>,
-                    maintain_queue_size<10, remove_task::oldest>>
-      scheduler;
+                    aging_policy<
+                        task_starvation_after<std::chrono::milliseconds, 250>, 
+                        increment_priority_by<1>>,
+                    maintain_queue_size<100, remove_task::oldest>>
+    scheduler;
 ```
 
 In priority-based scheduling, Each task is assigned a priority and the task with the highest priority is executed first. A steady flow of CPU bursts from the high priority tasks can starve the low-priority ones. To solve this problem, age-based priority modulation is used. `task_starvation_after<std::chrono::milliseconds, 250>>` specifies that any task at a lower priority that is starved of the CPU, i.e., waiting in a queue, for more than `250ms` will get a bump in priority. This way, low-priority tasks are not blocked indefinitely by higher priority tasks.
