@@ -38,11 +38,7 @@ int main() {
                     task_starvation_after<std::chrono::milliseconds, 250>> scheduler;
 ```
 
-* Specify the number of worker threads using `threads<size_t>`
-* Specify the number of priority levels, i.e., the number of queues/lanes, using `priority_levels<size_t>`
-* Specify the criteria for ***task starvation*** using `task_starvation_after<duration>`
-  - In priority-based scheduling, Each task is assigned a priority and the task with the highest priority is executed first. A steady flow of CPU bursts from the high priority tasks can starve the low-priority ones. To solve this problem, age-based priority modulation is used.    
-  - `task_starvation_after<std::chrono::milliseconds, 250>>` specifies that any task at a lower priority that is starved of the CPU, i.e., waiting in a queue, for more than `250ms` will get a bump in priority. This way, low-priority tasks are not blocked indefinitely by higher priority tasks.
+In priority-based scheduling, Each task is assigned a priority and the task with the highest priority is executed first. A steady flow of CPU bursts from the high priority tasks can starve the low-priority ones. To solve this problem, age-based priority modulation is used. `task_starvation_after<std::chrono::milliseconds, 250>>` specifies that any task at a lower priority that is starved of the CPU, i.e., waiting in a queue, for more than `250ms` will get a bump in priority. This way, low-priority tasks are not blocked indefinitely by higher priority tasks.
   
 ### Create a `Task`
   
