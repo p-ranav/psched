@@ -9,10 +9,10 @@
 namespace psched {
 
 class TaskQueue {
-  std::deque<Task> queue_;
-  bool done_{false};
-  std::mutex mutex_;
-  std::condition_variable ready_;
+  std::deque<Task> queue_;        // Internal queue data structure
+  bool done_{false};              // Set to true when no more tasks are expected
+  std::mutex mutex_;              // Mutex for the internal queue
+  std::condition_variable ready_; // Signal for when a task is enqueued
 
 public:
   bool try_pop(Task &task) {

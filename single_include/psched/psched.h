@@ -55,6 +55,9 @@ class Task {
   // Called if `task_main()` throws an exception
   std::function<void(const char *)> task_error_;
 
+  // Temporal behavior of Task
+  // Stats includes arrival_time, start_time, end_time
+  // Stats can be used to calculate waiting_time, burst_time, turnaround_time
   TaskStats stats_;
 
   friend class TaskQueue;
@@ -124,10 +127,10 @@ public:
 namespace psched {
 
 class TaskQueue {
-  std::deque<Task> queue_;
-  bool done_{false};
-  std::mutex mutex_;
-  std::condition_variable ready_;
+  std::deque<Task> queue_;        // Internal queue data structure
+  bool done_{false};              // Set to true when no more tasks are expected
+  std::mutex mutex_;              // Mutex for the internal queue
+  std::condition_variable ready_; // Signal for when a task is enqueued
 
 public:
   bool try_pop(Task &task) {
@@ -197,14 +200,11 @@ template <size_t P> struct priority { constexpr static size_t value = P; };
 
 template <size_t P> struct increment_priority { constexpr static size_t value = P; };
 
-template <typename T>
-struct is_chrono_duration {
-    static constexpr bool value = false;
-};
+template <typename T> struct is_chrono_duration { static constexpr bool value = false; };
 
 template <typename Rep, typename Period>
 struct is_chrono_duration<std::chrono::duration<Rep, Period>> {
-    static constexpr bool value = true;
+  static constexpr bool value = true;
 };
 
 template <class D, size_t P> struct task_starvation_after {
@@ -215,12 +215,12 @@ template <class D, size_t P> struct task_starvation_after {
 
 template <class threads, class priority_levels, class task_starvation_after>
 class PriorityScheduler {
-  std::vector<std::thread> threads_;
-  std::array<TaskQueue, priority_levels::value> priority_queues_;
-  std::atomic_bool running_{false};
-  std::mutex mutex_;
-  std::condition_variable ready_;
-  std::atomic_bool enqueued_{false};
+  std::vector<std::thread> threads_;                              // Scheduler thread pool
+  std::array<TaskQueue, priority_levels::value> priority_queues_; // Array of task queues
+  std::atomic_bool running_{false};                               // Is the scheduler running?
+  std::mutex mutex_;                                              // Mutex to protect `enqueued_`
+  std::condition_variable ready_;                                 // Signal to notify task enqueued
+  std::atomic_bool enqueued_{false}; // Set to true when a task is scheduled
 
   void run() {
     while (running_) {

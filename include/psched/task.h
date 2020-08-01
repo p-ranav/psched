@@ -20,6 +20,9 @@ class Task {
   // Called if `task_main()` throws an exception
   std::function<void(const char *)> task_error_;
 
+  // Temporal behavior of Task
+  // Stats includes arrival_time, start_time, end_time
+  // Stats can be used to calculate waiting_time, burst_time, turnaround_time
   TaskStats stats_;
 
   friend class TaskQueue;
