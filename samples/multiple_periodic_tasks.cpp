@@ -12,7 +12,8 @@ using namespace psched;
 
 int main() {
   PriorityScheduler<threads<3>, priority_levels<3>,
-                    task_starvation_after<std::chrono::milliseconds, 250>>
+                    task_starvation_after<std::chrono::milliseconds, 250>,
+                    maintain_queue_size<10, remove_task::oldest>>
       scheduler;
 
   Task a(

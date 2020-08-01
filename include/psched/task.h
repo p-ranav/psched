@@ -25,7 +25,7 @@ class Task {
   // Stats can be used to calculate waiting_time, burst_time, turnaround_time
   TaskStats stats_;
 
-  friend class TaskQueue;
+  template <class enforce_queue_size> friend class TaskQueue;
 
 protected:
   void save_arrival_time() { stats_.arrival_time = std::chrono::steady_clock::now(); }

@@ -32,13 +32,15 @@ template <class D, size_t P> struct task_starvation_after {
   constexpr static D value = D(P);
 };
 
-template <class threads, class priority_levels, class task_starvation_after>
+template <class threads, class priority_levels, class task_starvation_after,
+          class maintain_queue_size = maintain_queue_size<>>
 class PriorityScheduler {
-  std::vector<std::thread> threads_;                              // Scheduler thread pool
-  std::array<TaskQueue, priority_levels::value> priority_queues_; // Array of task queues
-  std::atomic_bool running_{false};                               // Is the scheduler running?
-  std::mutex mutex_;                                              // Mutex to protect `enqueued_`
-  std::condition_variable ready_;                                 // Signal to notify task enqueued
+  std::vector<std::thread> threads_; // Scheduler thread pool
+  std::array<TaskQueue<maintain_queue_size>, priority_levels::value>
+      priority_queues_;              // Array of task queues
+  std::atomic_bool running_{false};  // Is the scheduler running?
+  std::mutex mutex_;                 // Mutex to protect `enqueued_`
+  std::condition_variable ready_;    // Signal to notify task enqueued
   std::atomic_bool enqueued_{false}; // Set to true when a task is scheduled
 
   void run() {

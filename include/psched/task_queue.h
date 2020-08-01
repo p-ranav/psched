@@ -8,7 +8,15 @@
 
 namespace psched {
 
-class TaskQueue {
+enum class remove_task { oldest, newest };
+
+template <size_t size = 0, remove_task policy = remove_task::oldest> struct maintain_queue_size {
+  constexpr static bool is_bounded = (size > 0);
+  constexpr static size_t value = size;
+  constexpr static remove_task remove_policy = policy;
+};
+
+template <class queue_size = maintain_queue_size<>> class TaskQueue {
   std::deque<Task> queue_;        // Internal queue data structure
   bool done_{false};              // Set to true when no more tasks are expected
   std::mutex mutex_;              // Mutex for the internal queue
@@ -31,6 +39,18 @@ public:
         return false;
       task.save_arrival_time();
       queue_.emplace_back(task);
+
+      // Is the queue bounded?
+      if (queue_size::is_bounded) {
+        while (queue_.size() > queue_size::value) {
+          // Queue size greater than bound
+          if (queue_size::remove_policy == remove_task::newest) {
+            queue_.pop_back(); // newest task is in the back of the queue
+          } else if (queue_size::remove_policy == remove_task::oldest) {
+            queue_.pop_front(); // oldest task is in the front of the queue
+          }
+        }
+      }
     }
     ready_.notify_one();
     return true;

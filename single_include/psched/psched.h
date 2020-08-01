@@ -60,7 +60,7 @@ class Task {
   // Stats can be used to calculate waiting_time, burst_time, turnaround_time
   TaskStats stats_;
 
-  friend class TaskQueue;
+  template <class enforce_queue_size> friend class TaskQueue;
 
 protected:
   void save_arrival_time() { stats_.arrival_time = std::chrono::steady_clock::now(); }
@@ -126,7 +126,15 @@ public:
 
 namespace psched {
 
-class TaskQueue {
+enum class remove_task { oldest, newest };
+
+template <size_t size = 0, remove_task policy = remove_task::oldest> struct maintain_queue_size {
+  constexpr static bool is_bounded = (size > 0);
+  constexpr static size_t value = size;
+  constexpr static remove_task remove_policy = policy;
+};
+
+template <class queue_size = maintain_queue_size<>> class TaskQueue {
   std::deque<Task> queue_;        // Internal queue data structure
   bool done_{false};              // Set to true when no more tasks are expected
   std::mutex mutex_;              // Mutex for the internal queue
@@ -149,6 +157,18 @@ public:
         return false;
       task.save_arrival_time();
       queue_.emplace_back(task);
+
+      // Is the queue bounded?
+      if (queue_size::is_bounded) {
+        while (queue_.size() > queue_size::value) {
+          // Queue size greater than bound
+          if (queue_size::remove_policy == remove_task::newest) {
+            queue_.pop_back(); // newest task is in the back of the queue
+          } else if (queue_size::remove_policy == remove_task::oldest) {
+            queue_.pop_front(); // oldest task is in the front of the queue
+          }
+        }
+      }
     }
     ready_.notify_one();
     return true;
@@ -213,13 +233,15 @@ template <class D, size_t P> struct task_starvation_after {
   constexpr static D value = D(P);
 };
 
-template <class threads, class priority_levels, class task_starvation_after>
+template <class threads, class priority_levels, class task_starvation_after,
+          class maintain_queue_size = maintain_queue_size<>>
 class PriorityScheduler {
-  std::vector<std::thread> threads_;                              // Scheduler thread pool
-  std::array<TaskQueue, priority_levels::value> priority_queues_; // Array of task queues
-  std::atomic_bool running_{false};                               // Is the scheduler running?
-  std::mutex mutex_;                                              // Mutex to protect `enqueued_`
-  std::condition_variable ready_;                                 // Signal to notify task enqueued
+  std::vector<std::thread> threads_; // Scheduler thread pool
+  std::array<TaskQueue<maintain_queue_size>, priority_levels::value>
+      priority_queues_;              // Array of task queues
+  std::atomic_bool running_{false};  // Is the scheduler running?
+  std::mutex mutex_;                 // Mutex to protect `enqueued_`
+  std::condition_variable ready_;    // Signal to notify task enqueued
   std::atomic_bool enqueued_{false}; // Set to true when a task is scheduled
 
   void run() {
