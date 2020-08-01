@@ -122,19 +122,31 @@ public:
 #include <deque>
 #include <functional>
 #include <mutex>
+// #include <psched/queue_size.h>
+
+#include <stddef.h>
+
+namespace psched {
+
+enum class discard { oldest_task, newest_task };
+
+template <size_t queue_size, discard policy> struct maintain_size {
+  constexpr static size_t bounded_queue_size = queue_size;
+  constexpr static discard discard_policy = policy;
+};
+
+template <size_t count, class M = maintain_size<0, discard::oldest_task>> struct queues {
+  constexpr static bool bounded_or_not = (M::bounded_queue_size > 0);
+  constexpr static size_t number_of_queues = count;
+  typedef M maintain_size;
+};
+
+} // namespace psched
 // #include <psched/task.h>
 
 namespace psched {
 
-enum class remove_task { oldest, newest };
-
-template <size_t size = 0, remove_task policy = remove_task::oldest> struct maintain_queue_size {
-  constexpr static bool is_bounded = (size > 0);
-  constexpr static size_t value = size;
-  constexpr static remove_task remove_policy = policy;
-};
-
-template <class queue_size = maintain_queue_size<>> class TaskQueue {
+template <class queue_policy> class TaskQueue {
   std::deque<Task> queue_;        // Internal queue data structure
   bool done_{false};              // Set to true when no more tasks are expected
   std::mutex mutex_;              // Mutex for the internal queue
@@ -159,12 +171,12 @@ public:
       queue_.emplace_back(task);
 
       // Is the queue bounded?
-      if (queue_size::is_bounded) {
-        while (queue_.size() > queue_size::value) {
+      if (queue_policy::bounded_or_not) {
+        while (queue_.size() > queue_policy::maintain_size::bounded_queue_size) {
           // Queue size greater than bound
-          if (queue_size::remove_policy == remove_task::newest) {
+          if (queue_policy::maintain_size::discard_policy == discard::newest_task) {
             queue_.pop_back(); // newest task is in the back of the queue
-          } else if (queue_size::remove_policy == remove_task::oldest) {
+          } else if (queue_policy::maintain_size::discard_policy == discard::oldest_task) {
             queue_.pop_front(); // oldest task is in the front of the queue
           }
         }
@@ -205,18 +217,11 @@ public:
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
-// #include <psched/task.h>
-// #include <psched/task_queue.h>
-#include <thread>
-#include <vector>
+// #include <psched/aging_policy.h>
+
+#include <chrono>
 
 namespace psched {
-
-template <size_t T> struct threads { constexpr static size_t value = T; };
-
-template <size_t P> struct priority_levels { constexpr static size_t value = P; };
-
-template <size_t P> struct priority { constexpr static size_t value = P; };
 
 template <typename T> struct is_chrono_duration { static constexpr bool value = false; };
 
@@ -226,7 +231,6 @@ struct is_chrono_duration<std::chrono::duration<Rep, Period>> {
 };
 
 template <class D = std::chrono::milliseconds, size_t P = 0> struct task_starvation_after {
-  constexpr static bool priority_modulation_enabled = (P > 0);
   static_assert(is_chrono_duration<D>::value, "Duration must be a std::chrono::duration");
   typedef D type;
   constexpr static D value = D(P);
@@ -234,21 +238,32 @@ template <class D = std::chrono::milliseconds, size_t P = 0> struct task_starvat
 
 template <size_t P> struct increment_priority_by { constexpr static size_t value = P; };
 
-template <class T, class I> struct aging_policy {
+template <class T = task_starvation_after<>, class I = increment_priority_by<1>>
+struct aging_policy {
   typedef T task_starvation_after;
   typedef I increment_priority_by;
 };
 
-template <class threads, class priority_levels,
-          class aging_policy = aging_policy<task_starvation_after<>, increment_priority_by<1>>,
-          class maintain_queue_size = maintain_queue_size<>>
-class PriorityScheduler {
-  std::vector<std::thread> threads_; // Scheduler thread pool
-  std::array<TaskQueue<maintain_queue_size>, priority_levels::value>
-      priority_queues_;              // Array of task queues
-  std::atomic_bool running_{false};  // Is the scheduler running?
-  std::mutex mutex_;                 // Mutex to protect `enqueued_`
-  std::condition_variable ready_;    // Signal to notify task enqueued
+} // namespace psched
+// #include <psched/task.h>
+// #include <psched/task_queue.h>
+#include <thread>
+#include <vector>
+
+namespace psched {
+
+template <size_t T> struct threads { constexpr static size_t value = T; };
+
+template <size_t P> struct priority { constexpr static size_t value = P; };
+
+template <class threads, class queues, class aging_policy> class PriorityScheduler {
+  constexpr static size_t priority_levels = queues::number_of_queues;
+
+  std::vector<std::thread> threads_;                               // Scheduler thread pool
+  std::array<TaskQueue<queues>, priority_levels> priority_queues_; // Array of task queues
+  std::atomic_bool running_{false};                                // Is the scheduler running?
+  std::mutex mutex_;                                               // Mutex to protect `enqueued_`
+  std::condition_variable ready_;                                  // Signal to notify task enqueued
   std::atomic_bool enqueued_{false}; // Set to true when a task is scheduled
 
   void run() {
@@ -266,22 +281,19 @@ class PriorityScheduler {
 
       Task task;
 
-      if (aging_policy::task_starvation_after::priority_modulation_enabled) {
-        // Handle task starvation at lower priorities
-        // Modulate priorities based on age
-        // Start from the lowest priority till (highest_priority - 1)
-        for (size_t i = 0; i < priority_levels::value - 1; i++) {
-          // Check if the front of the queue has a starving task
-          if (priority_queues_[i]
-                  .template try_pop_if_starved<typename aging_policy::task_starvation_after>(
-                      task)) {
-            // task has been starved, reschedule at a higher priority
-            while (running_) {
-              const auto new_priority = std::min(i + aging_policy::increment_priority_by::value,
-                                                 priority_levels::value - 1);
-              if (priority_queues_[new_priority].try_push(task)) {
-                break;
-              }
+      // Handle task starvation at lower priorities
+      // Modulate priorities based on age
+      // Start from the lowest priority till (highest_priority - 1)
+      for (size_t i = 0; i < priority_levels - 1; i++) {
+        // Check if the front of the queue has a starving task
+        if (priority_queues_[i]
+                .template try_pop_if_starved<typename aging_policy::task_starvation_after>(task)) {
+          // task has been starved, reschedule at a higher priority
+          while (running_) {
+            const auto new_priority =
+                std::min(i + aging_policy::increment_priority_by::value, priority_levels - 1);
+            if (priority_queues_[new_priority].try_push(task)) {
+              break;
             }
           }
         }
@@ -292,7 +304,7 @@ class PriorityScheduler {
 
       // Start from highest priority queue
       do {
-        for (size_t i = priority_levels::value - 1; i >= 0; i--) {
+        for (size_t i = priority_levels - 1; i >= 0; i--) {
           // Try to pop an item
           if (priority_queues_[i].try_pop(task)) {
             dequeued = true;
@@ -323,7 +335,7 @@ public:
   }
 
   template <class priority> void schedule(Task &task) {
-    static_assert(priority::value <= priority_levels::value, "priority out of range");
+    static_assert(priority::value <= priority_levels, "priority out of range");
 
     // Enqueue task
     while (running_) {

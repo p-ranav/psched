@@ -12,9 +12,8 @@ using namespace psched;
 
 int main() {
   PriorityScheduler<
-      threads<3>, priority_levels<3>,
-      aging_policy<task_starvation_after<std::chrono::milliseconds, 250>, increment_priority_by<1>>,
-      maintain_queue_size<100, remove_task::oldest>>
+      threads<3>, queues<3, maintain_size<100, discard::oldest_task>>,
+      aging_policy<task_starvation_after<std::chrono::milliseconds, 250>, increment_priority_by<1>>>
       scheduler;
 
   Task a(

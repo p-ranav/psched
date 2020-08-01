@@ -3,8 +3,10 @@
     "target": "single_include/psched/psched.h",
     "sources": [
         "include/psched/task_stats.h",
+        "include/psched/queue_size.h",
         "include/psched/task.h",
         "include/psched/task_queue.h",
+        "include/psched/aging_policy.h",
         "include/psched/priority_scheduler.h"
     ],
     "include_paths": ["include"]
