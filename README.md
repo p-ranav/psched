@@ -35,9 +35,11 @@ using namespace psched;
 int main() {
   PriorityScheduler<threads<3>, 
                     queues<3, maintain_size<100, discard::oldest_task>>,
-                    aging_policy<task_starvation_after<std::chrono::milliseconds, 250>,
-                                 increment_priority_by<1>>>
-    scheduler;
+                    aging_policy<
+                        task_starvation_after<std::chrono::milliseconds, 250>, 
+                        increment_priority_by<1>
+                    >>
+      scheduler;
 ```
   
 ### Create a `Task`
