@@ -112,6 +112,23 @@ public:
     }
   }
 
+  void schedule(Task &task, std::size_t priority) {
+
+    // Enqueue task
+    while (running_) {
+      if (priority_queues_[priority].try_push(task)) {
+        break;
+      }
+    }
+
+    // Send `enqueued` signal to worker threads
+    {
+      std::unique_lock<std::mutex> lock{mutex_};
+      enqueued_ = true;
+      ready_.notify_one();
+    }
+  }
+
   void stop() {
     running_ = false;
     ready_.notify_all();
