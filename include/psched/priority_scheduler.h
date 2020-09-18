@@ -24,15 +24,15 @@ template <class threads, class queues, class aging_policy> class PrioritySchedul
   std::atomic_bool running_{false};                                // Is the scheduler running?
   std::mutex mutex_;                                               // Mutex to protect `enqueued_`
   std::condition_variable ready_;                                  // Signal to notify task enqueued
-  std::atomic_bool enqueued_{false}; // Set to true when a task is scheduled
+  std::atomic_size_t enqueued_{0}; // Incremented when a task is scheduled
 
   void run() {
     while (running_) {
       // Wait for the `enqueued` signal
       {
         std::unique_lock<std::mutex> lock{mutex_};
-        ready_.wait(lock, [this] { return enqueued_.load() || !running_; });
-        enqueued_ = false;
+        ready_.wait(lock, [this] { return enqueued_.load() > 0 || !running_; });
+        enqueued_--;
       }
 
       if (!running_) {
@@ -107,7 +107,7 @@ public:
     // Send `enqueued` signal to worker threads
     {
       std::unique_lock<std::mutex> lock{mutex_};
-      enqueued_ = true;
+      enqueued_ += 1;
       ready_.notify_one();
     }
   }
