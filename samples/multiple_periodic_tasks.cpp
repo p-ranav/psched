@@ -54,7 +54,7 @@ int main() {
 
   Task c(
       // Task action
-      [] { std::this_thread::sleep_for(std::chrono::milliseconds(560)); },
+      [] { std::this_thread::sleep_for(std::chrono::milliseconds(500)); },
       // Task post-completion callback
       [](const TaskStats &stats) {
         std::cout << "[Task c] ";
