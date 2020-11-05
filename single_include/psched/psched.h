@@ -276,23 +276,23 @@ template <class threads, class queues, class aging_policy> class PrioritySchedul
 
       Task t;
 
-      // // Handle task starvation at lower priorities
-      // // Modulate priorities based on age
-      // // Start from the lowest priority till (highest_priority - 1)
-      // for (size_t i = 0; i < priority_levels - 1; i++) {
-      //   // Check if the front of the queue has a starving task
-      //   if (priority_queues_[i]
-      //           .template try_pop_if_starved<typename aging_policy::task_starvation_after>(t)) {
-      //     // task has been starved, reschedule at a higher priority
-      //     while (running_) {
-      //       const auto new_priority =
-      //           std::min(i + aging_policy::increment_priority_by::value, priority_levels - 1);
-      //       if (priority_queues_[new_priority].try_push(t)) {
-      //         break;
-      //       }
-      //     }
-      //   }
-      // }
+      // Handle task starvation at lower priorities
+      // Modulate priorities based on age
+      // Start from the lowest priority till (highest_priority - 1)
+      for (size_t i = 0; i < priority_levels - 1; i++) {
+        // Check if the front of the queue has a starving task
+        if (priority_queues_[i]
+                .template try_pop_if_starved<typename aging_policy::task_starvation_after>(t)) {
+          // task has been starved, reschedule at a higher priority
+          while (running_) {
+            const auto new_priority =
+                std::min(i + aging_policy::increment_priority_by::value, priority_levels - 1);
+            if (priority_queues_[new_priority].try_push(t)) {
+              break;
+            }
+          }
+        }
+      }
 
       // Run the highest priority ready task
       bool dequeued = false;
