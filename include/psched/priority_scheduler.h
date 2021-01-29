@@ -80,7 +80,7 @@ public:
   PriorityScheduler() {
     running_ = true;
     for (unsigned n = 0; n != threads::value; ++n) {
-      threads_.emplace_back([&, n] { run(); });
+      threads_.emplace_back([this] { run(); });
     }
   }
 
